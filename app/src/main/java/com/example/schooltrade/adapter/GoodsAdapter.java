@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,23 +16,43 @@ import com.example.schooltrade.utils.ImageUtil;
 import java.util.List;
 
 public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
-    private Context context;
-    private List<Goods> list;
+    private final Context context;
+    private final List<Goods> list;
     private OnGoodsClickListener listener;
+    private OnItemClickListener itemClickListener;
+    private boolean isMyPublishMode = false; // 是否为「我的发布」模式
 
-    // 回调接口
-    public interface OnGoodsClickListener{
+    // 商品操作监听（仅管理模式用）
+    public interface OnGoodsClickListener {
         void onEdit(int position);
         void onDelete(int position);
     }
 
-    public void setOnGoodsClickListener(OnGoodsClickListener listener){
-        this.listener = listener;
+    // 条目点击监听（跳转详情）
+    public interface OnItemClickListener {
+        void onItemClick(int position);
     }
 
+    // 构造方法：普通模式（首页，无按钮）
     public GoodsAdapter(Context context, List<Goods> list) {
         this.context = context;
         this.list = list;
+        this.isMyPublishMode = false;
+    }
+
+    // 构造方法：管理模式（我的发布，有按钮）
+    public GoodsAdapter(Context context, List<Goods> list, boolean isMyPublishMode) {
+        this.context = context;
+        this.list = list;
+        this.isMyPublishMode = isMyPublishMode;
+    }
+
+    public void setOnGoodsClickListener(OnGoodsClickListener listener) {
+        this.listener = listener;
+    }
+
+    public void setOnItemClickListener(OnItemClickListener itemClickListener) {
+        this.itemClickListener = itemClickListener;
     }
 
     @NonNull
@@ -55,18 +76,23 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
 
         ImageUtil.loadImage(holder.img, g.getImgUrl());
 
-        // 编辑点击
-        holder.btnEdit.setOnClickListener(v->{
-            if(listener != null){
-                listener.onEdit(position);
-            }
+        // 条目点击跳转详情
+        holder.itemView.setOnClickListener(v -> {
+            if (itemClickListener != null) itemClickListener.onItemClick(position);
         });
-        // 删除点击
-        holder.btnDelete.setOnClickListener(v->{
-            if(listener != null){
-                listener.onDelete(position);
-            }
-        });
+
+        // 仅在「我的发布」模式下显示按钮
+        if (isMyPublishMode) {
+            holder.llButtons.setVisibility(View.VISIBLE);
+            holder.btnEdit.setOnClickListener(v -> {
+                if (listener != null) listener.onEdit(position);
+            });
+            holder.btnDelete.setOnClickListener(v -> {
+                if (listener != null) listener.onDelete(position);
+            });
+        } else {
+            holder.llButtons.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -75,7 +101,8 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
     public static class Holder extends RecyclerView.ViewHolder {
         ImageView img;
         TextView title, content, type;
-        Button btnEdit,btnDelete;
+        LinearLayout llButtons;
+        Button btnEdit, btnDelete;
 
         public Holder(@NonNull View itemView) {
             super(itemView);
@@ -83,6 +110,7 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
             title = itemView.findViewById(R.id.tv_title);
             content = itemView.findViewById(R.id.tv_content);
             type = itemView.findViewById(R.id.tv_type);
+            llButtons = itemView.findViewById(R.id.ll_buttons);
             btnEdit = itemView.findViewById(R.id.btn_edit);
             btnDelete = itemView.findViewById(R.id.btn_delete);
         }

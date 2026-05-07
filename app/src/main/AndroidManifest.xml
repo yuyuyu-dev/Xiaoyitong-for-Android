@@ -24,6 +24,8 @@
         <activity android:name=".ui.publish.PublishActivity" />
         <activity android:name=".ui.goods.MyPublishActivity" />
         <activity android:name=".ui.goods.EditGoodsActivity" />
+        <activity android:name=".ui.goods.GoodsDetailActivity" />
+        <activity android:name=".ui.goods.MyCollectActivity" />
     </application>
 
 </manifest>

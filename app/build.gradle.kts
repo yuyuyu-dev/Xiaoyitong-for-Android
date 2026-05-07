@@ -48,4 +48,5 @@ dependencies {
     implementation("net.sourceforge.jtds:jtds:1.3.1")
 // RecyclerView 列表控件
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 }

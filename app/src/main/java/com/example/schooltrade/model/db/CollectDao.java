@@ -53,4 +53,18 @@ public class CollectDao {
         }
         return list;
     }
+    // 检查是否已收藏
+    public static boolean isCollect(int userId, int goodsId) {
+        String sql = "SELECT * FROM Collect WHERE user_id=? AND goods_id=?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            pstmt.setInt(2, goodsId);
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

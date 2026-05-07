@@ -2,11 +2,11 @@ package com.example.schooltrade.ui.goods;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
-import android.app.AlertDialog;
 import com.example.schooltrade.R;
 import com.example.schooltrade.adapter.GoodsAdapter;
 import com.example.schooltrade.base.BaseActivity;
@@ -22,21 +22,16 @@ public class MyPublishActivity extends BaseActivity {
     private List<Goods> myGoodsList;
     private int userId;
 
-    // ===================== 最新 Activity Result API =====================
+    // 最新Activity Result API
     private final ActivityResultLauncher<Intent> editLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                if (result.getResultCode() == RESULT_OK) {
-                    // 编辑成功 → 刷新列表
-                    loadMyGoods();
-                }
+                if (result.getResultCode() == RESULT_OK) loadMyGoods();
             }
     );
 
     @Override
-    protected int getLayoutId() {
-        return R.layout.activity_my_publish;
-    }
+    protected int getLayoutId() { return R.layout.activity_my_publish; }
 
     @Override
     protected void initView() {
@@ -56,17 +51,14 @@ public class MyPublishActivity extends BaseActivity {
             myGoodsList = GoodsDao.getMyGoods(userId);
             runOnUiThread(() -> {
                 hideLoading();
-                if (myGoodsList.isEmpty()) {
-                    ToastUtil.show(this, "你还没有发布任何商品");
-                }
-
-                adapter = new GoodsAdapter(MyPublishActivity.this, myGoodsList);
+                if (myGoodsList.isEmpty()) ToastUtil.show(this, "暂无发布商品");
+                // 使用管理模式（第二个参数为true）
+                adapter = new GoodsAdapter(this, myGoodsList, true);
                 recyclerMy.setAdapter(adapter);
 
                 adapter.setOnGoodsClickListener(new GoodsAdapter.OnGoodsClickListener() {
                     @Override
                     public void onEdit(int position) {
-                        // 最新跳转方式
                         Intent intent = new Intent(MyPublishActivity.this, EditGoodsActivity.class);
                         intent.putExtra("goodsId", myGoodsList.get(position).getGoodsId());
                         editLauncher.launch(intent);
@@ -76,8 +68,8 @@ public class MyPublishActivity extends BaseActivity {
                     public void onDelete(int position) {
                         new AlertDialog.Builder(MyPublishActivity.this)
                                 .setTitle("提示")
-                                .setMessage("确定要删除该商品吗？")
-                                .setPositiveButton("删除", (dialog, which) -> delGoods(position))
+                                .setMessage("确定删除？")
+                                .setPositiveButton("确定", (d, w) -> delGoods(position))
                                 .setNegativeButton("取消", null)
                                 .show();
                     }

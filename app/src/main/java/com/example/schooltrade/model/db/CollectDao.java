@@ -1,9 +1,11 @@
 package com.example.schooltrade.model.db;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+
 import com.example.schooltrade.entity.Goods;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,60 +13,50 @@ public class CollectDao {
 
     // 添加收藏
     public static boolean addCollect(int userId, int goodsId) {
-        String sql = "INSERT INTO Collect(user_id, goods_id) VALUES(?,?)";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, userId);
-            pstmt.setInt(2, goodsId);
-            return pstmt.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        SQLiteDatabase db = DBUtil.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("user_id", userId);
+        values.put("goods_id", goodsId);
+        
+        long result = db.insert("Collect", null, values);
+        return result > 0;
     }
 
     // 取消收藏
     public static boolean cancelCollect(int userId, int goodsId) {
-        String sql = "DELETE FROM Collect WHERE user_id=? AND goods_id=?";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, userId);
-            pstmt.setInt(2, goodsId);
-            return pstmt.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        SQLiteDatabase db = DBUtil.getWritableDatabase();
+        int result = db.delete("Collect", "user_id=? AND goods_id=?", 
+                new String[]{String.valueOf(userId), String.valueOf(goodsId)});
+        return result > 0;
     }
 
     // 查询我的收藏
     public static List<Goods> getMyCollect(int userId) {
         List<Goods> list = new ArrayList<>();
+        SQLiteDatabase db = DBUtil.getReadableDatabase();
         String sql = "SELECT g.* FROM GoodsInfo g INNER JOIN Collect c ON g.GoodsID=c.goods_id WHERE c.user_id=?";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, userId);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                list.add(GoodsDao.mapToGoods(rs));
+        Cursor cursor = db.rawQuery(sql, new String[]{String.valueOf(userId)});
+        
+        try {
+            while (cursor.moveToNext()) {
+                list.add(GoodsDao.mapToGoods(cursor));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } finally {
+            cursor.close();
         }
         return list;
     }
+    
     // 检查是否已收藏
     public static boolean isCollect(int userId, int goodsId) {
+        SQLiteDatabase db = DBUtil.getReadableDatabase();
         String sql = "SELECT * FROM Collect WHERE user_id=? AND goods_id=?";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, userId);
-            pstmt.setInt(2, goodsId);
-            ResultSet rs = pstmt.executeQuery();
-            return rs.next();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+        Cursor cursor = db.rawQuery(sql, new String[]{String.valueOf(userId), String.valueOf(goodsId)});
+        
+        try {
+            return cursor.moveToFirst();
+        } finally {
+            cursor.close();
         }
     }
 }

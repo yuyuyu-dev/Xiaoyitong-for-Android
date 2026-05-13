@@ -8,4 +8,12 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="red">#F44336</color>
+    
+    <!-- 蓝色主题配色 -->
+    <color name="primary_blue">#2196F3</color>
+    <color name="primary_dark_blue">#1976D2</color>
+    <color name="accent_blue">#64B5F6</color>
+    <color name="bg_gray">#F5F7FA</color>
+    <color name="text_primary">#333333</color>
+    <color name="text_secondary">#757575</color>
 </resources>

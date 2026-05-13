@@ -5,9 +5,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.os.Bundle;
+import android.widget.ImageView;
 import com.example.schooltrade.R;
 import com.example.schooltrade.adapter.GoodsAdapter;
 import com.example.schooltrade.model.db.CollectDao;
+import com.example.schooltrade.model.db.DBUtil;
 import com.example.schooltrade.entity.Goods;
 import com.example.schooltrade.utils.ToastUtil;
 import com.example.schooltrade.utils.UserSession;
@@ -22,6 +24,8 @@ public class MyCollectActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // 初始化数据库
+        DBUtil.init(this);
         setContentView(R.layout.activity_my_collect);
         userId = UserSession.getCurrentUser().getUserId();
         initView();
@@ -29,6 +33,12 @@ public class MyCollectActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        // 返回按钮
+        ImageView btnBack = findViewById(R.id.btn_back);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
+
         refreshLayout = findViewById(R.id.refreshLayout);
         recycler = findViewById(R.id.recycler_collect);
         recycler.setLayoutManager(new LinearLayoutManager(this));

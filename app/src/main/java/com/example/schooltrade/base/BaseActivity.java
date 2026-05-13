@@ -3,6 +3,7 @@ package com.example.schooltrade.base;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import com.example.schooltrade.model.db.DBUtil;
 
 public abstract class BaseActivity extends AppCompatActivity {
     private ProgressDialog loadingDialog;
@@ -14,6 +15,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // 初始化数据库
+        DBUtil.init(this);
         setContentView(getLayoutId());
         initLoadingDialog();
         initView();

@@ -1,29 +1,35 @@
 package com.example.schooltrade.model.db;
 
-import com.example.schooltrade.config.AppConfig;
-import java.sql.Connection;
-import java.sql.DriverManager;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 
 public class DBUtil {
-    public static Connection getConnection() {
-        try {
-            Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            return DriverManager.getConnection(
-                    AppConfig.getDBUrl(),
-                    AppConfig.DB_USER,
-                    AppConfig.DB_PWD
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+    private static SchoolTradeDatabaseHelper dbHelper;
+
+    public static void init(Context context) {
+        if (dbHelper == null) {
+            dbHelper = new SchoolTradeDatabaseHelper(context.getApplicationContext());
         }
     }
 
-    public static void close(Connection conn) {
-        try {
-            if (conn != null) conn.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+    public static SQLiteDatabase getWritableDatabase() {
+        if (dbHelper == null) {
+            throw new IllegalStateException("DBUtil not initialized. Call init() first.");
+        }
+        return dbHelper.getWritableDatabase();
+    }
+
+    public static SQLiteDatabase getReadableDatabase() {
+        if (dbHelper == null) {
+            throw new IllegalStateException("DBUtil not initialized. Call init() first.");
+        }
+        return dbHelper.getReadableDatabase();
+    }
+
+    public static void closeDatabase() {
+        if (dbHelper != null) {
+            dbHelper.close();
+            dbHelper = null;
         }
     }
 }

@@ -44,8 +44,6 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation("androidx.cardview:cardview:1.0.0")
-    // SQL Server 连接驱动
-    implementation("net.sourceforge.jtds:jtds:1.3.1")
 // RecyclerView 列表控件
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")

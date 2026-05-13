@@ -13,14 +13,13 @@ import com.example.schooltrade.base.BaseFragment;
 import com.example.schooltrade.entity.User;
 import com.example.schooltrade.ui.goods.MyCollectActivity;
 import com.example.schooltrade.ui.goods.MyPublishActivity;
-import com.example.schooltrade.ui.publish.PublishActivity;
 import com.example.schooltrade.ui.login.LoginActivity;
 import com.example.schooltrade.utils.ToastUtil;
 import com.example.schooltrade.utils.UserSession;
 
 public class MineFragment extends BaseFragment {
     private TextView tvUsername, tvAccount;
-    private LinearLayout llPublish, llMyPublish, llMyCollect;
+    private LinearLayout llMyPublish, llMyCollect;
     private Button btnLogout;
 
     @Override
@@ -28,7 +27,6 @@ public class MineFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.fragment_mine, container, false);
         tvUsername = view.findViewById(R.id.tv_username);
         tvAccount = view.findViewById(R.id.tv_account);
-        llPublish = view.findViewById(R.id.ll_publish);
         llMyPublish = view.findViewById(R.id.ll_my_publish);
         llMyCollect = view.findViewById(R.id.ll_my_collect);
         btnLogout = view.findViewById(R.id.btn_logout);
@@ -47,15 +45,6 @@ public class MineFragment extends BaseFragment {
     }
 
     private void initClick() {
-        // 发布商品
-        llPublish.setOnClickListener(v -> {
-            if (UserSession.isLogin()) {
-                startActivity(new Intent(mContext, PublishActivity.class));
-            } else {
-                ToastUtil.show(mContext, "请先登录");
-            }
-        });
-
         // 我的发布
         llMyPublish.setOnClickListener(v -> {
             if (UserSession.isLogin()) {

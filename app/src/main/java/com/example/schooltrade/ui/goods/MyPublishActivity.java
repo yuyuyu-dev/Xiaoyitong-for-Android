@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ImageView;
 import com.example.schooltrade.R;
 import com.example.schooltrade.adapter.GoodsAdapter;
 import com.example.schooltrade.base.BaseActivity;
@@ -35,6 +36,12 @@ public class MyPublishActivity extends BaseActivity {
 
     @Override
     protected void initView() {
+        // 返回按钮
+        ImageView btnBack = findViewById(R.id.btn_back);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
+
         recyclerMy = findViewById(R.id.recycler_my);
         recyclerMy.setLayoutManager(new LinearLayoutManager(this));
     }

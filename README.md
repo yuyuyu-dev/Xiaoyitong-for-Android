@@ -65,11 +65,9 @@ app/src/main/java/com/example/schooltrade/
 ## 🤝 贡献指南
 欢迎提交 Issue 和 Pull Request！
 
-## 📄 许可证
-MIT License
 
 ## 👨‍💻 作者
-你的名字
+yuyuyu移动开发技术小组
 
 ---
-Made with ❤️ for Campus Life
+Have a good coding life

@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class SchoolTradeDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "schooltrade.db";
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
 
     // 用户表
     private static final String CREATE_USER_TABLE = 
@@ -56,6 +56,19 @@ public class SchoolTradeDatabaseHelper extends SQLiteOpenHelper {
         "create_time TEXT DEFAULT (datetime('now'))" +
         ")";
 
+    // 消息表
+    private static final String CREATE_MESSAGE_TABLE = 
+        "CREATE TABLE IF NOT EXISTS Message (" +
+        "message_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+        "sender_id INTEGER NOT NULL, " +
+        "receiver_id INTEGER NOT NULL, " +
+        "goods_id INTEGER NOT NULL, " +
+        "content TEXT NOT NULL, " +
+        "message_type TEXT DEFAULT 'text', " +
+        "is_read INTEGER DEFAULT 0, " +
+        "create_time TEXT DEFAULT (datetime('now'))" +
+        ")";
+
     public SchoolTradeDatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
@@ -66,11 +79,12 @@ public class SchoolTradeDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_GOODS_TABLE);
         db.execSQL(CREATE_ADMIN_TABLE);
         db.execSQL(CREATE_COLLECT_TABLE);
+        db.execSQL(CREATE_MESSAGE_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // 如果后续版本需要修改表结构，在这里处理
+        db.execSQL("DROP TABLE IF EXISTS Message");
         db.execSQL("DROP TABLE IF EXISTS Collect");
         db.execSQL("DROP TABLE IF EXISTS AdminInfo");
         db.execSQL("DROP TABLE IF EXISTS GoodsInfo");

@@ -4,16 +4,12 @@ import android.content.Intent;
 import androidx.fragment.app.Fragment;
 import com.example.schooltrade.R;
 import com.example.schooltrade.base.BaseActivity;
-import com.example.schooltrade.ui.publish.PublishActivity;
+import com.example.schooltrade.ui.message.MessageFragment;
 import com.example.schooltrade.ui.publish.PublishActivityWithImage;
-import com.example.schooltrade.ui.publish.PublishActivitySimple;
-import com.example.schooltrade.ui.publish.PublishActivityFinal;
-import com.example.schooltrade.ui.publish.TestPublishActivity;
-import com.example.schooltrade.ui.publish.SimplePublishActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends BaseActivity {
-    private Fragment homeFragment, mineFragment;
+    private Fragment homeFragment, messageFragment, mineFragment;
 
     @Override
     protected int getLayoutId() { return R.layout.activity_main; }
@@ -22,6 +18,7 @@ public class MainActivity extends BaseActivity {
     protected void initView() {
         BottomNavigationView nav = findViewById(R.id.bottom_nav);
         homeFragment = new HomeFragment();
+        messageFragment = new MessageFragment();
         mineFragment = new MineFragment();
 
         getSupportFragmentManager().beginTransaction().replace(R.id.container, homeFragment).commit();
@@ -30,10 +27,11 @@ public class MainActivity extends BaseActivity {
             if (item.getItemId() == R.id.nav_home) {
                 getSupportFragmentManager().beginTransaction().replace(R.id.container, homeFragment).commit();
                 return true;
+            } else if (item.getItemId() == R.id.nav_message) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.container, messageFragment).commit();
+                return true;
             } else if (item.getItemId() == R.id.nav_publish) {
-                // 打开发布商品页面 - 使用带图片功能的版本
                 startActivity(new Intent(MainActivity.this, PublishActivityWithImage.class));
-                // 保持首页选中状态
                 nav.setSelectedItemId(R.id.nav_home);
                 return true;
             } else if (item.getItemId() == R.id.nav_mine) {

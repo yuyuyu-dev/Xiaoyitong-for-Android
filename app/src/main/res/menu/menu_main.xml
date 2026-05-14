@@ -9,6 +9,10 @@
         android:title="发布"
         android:icon="@android:drawable/ic_input_add"/>
     <item
+        android:id="@+id/nav_message"
+        android:title="消息"
+        android:icon="@android:drawable/ic_dialog_email"/>
+    <item
         android:id="@+id/nav_mine"
         android:title="我的"
         android:icon="@android:drawable/ic_menu_myplaces"/>

@@ -34,6 +34,7 @@
         <activity android:name=".ui.goods.EditGoodsActivity" />
         <activity android:name=".ui.goods.GoodsDetailActivity" />
         <activity android:name=".ui.goods.MyCollectActivity" />
+        <activity android:name=".ui.message.ChatActivity" />
     </application>
 
 </manifest>

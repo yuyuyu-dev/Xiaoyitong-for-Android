@@ -34,46 +34,82 @@ public class ChatActivity extends BaseActivity {
 
     @Override
     protected void initView() {
-        ImageView btnBack = findViewById(R.id.btn_back);
-        if (btnBack != null) {
-            btnBack.setOnClickListener(v -> finish());
+        try {
+            ImageView btnBack = findViewById(R.id.btn_back);
+            if (btnBack != null) {
+                btnBack.setOnClickListener(v -> finish());
+            }
+
+            tvTitle = findViewById(R.id.tv_title);
+            recyclerChat = findViewById(R.id.recycler_chat);
+            etInput = findViewById(R.id.et_input);
+            ImageView btnSend = findViewById(R.id.btn_send);
+
+            if (recyclerChat == null) {
+                ToastUtil.show(this, "页面初始化失败");
+                finish();
+                return;
+            }
+
+            recyclerChat.setLayoutManager(new LinearLayoutManager(this));
+
+            otherUserId = getIntent().getIntExtra("otherUserId", 0);
+            otherUserName = getIntent().getStringExtra("otherUserName");
+            goodsId = getIntent().getIntExtra("goodsId", 0);
+            goodsTitle = getIntent().getStringExtra("goodsTitle");
+            
+            if (UserSession.getCurrentUser() == null) {
+                ToastUtil.show(this, "请先登录");
+                finish();
+                return;
+            }
+            currentUserId = UserSession.getCurrentUser().getUserId();
+
+            tvTitle.setText(otherUserName != null ? otherUserName : "聊天");
+
+            if (btnSend != null) {
+                btnSend.setOnClickListener(v -> sendMessage());
+            }
+
+            loadMessages();
+        } catch (Exception e) {
+            e.printStackTrace();
+            ToastUtil.show(this, "页面加载失败：" + e.getMessage());
+            finish();
         }
-
-        tvTitle = findViewById(R.id.tv_title);
-        recyclerChat = findViewById(R.id.recycler_chat);
-        etInput = findViewById(R.id.et_input);
-        ImageView btnSend = findViewById(R.id.btn_send);
-
-        recyclerChat.setLayoutManager(new LinearLayoutManager(this));
-
-        otherUserId = getIntent().getIntExtra("otherUserId", 0);
-        otherUserName = getIntent().getStringExtra("otherUserName");
-        goodsId = getIntent().getIntExtra("goodsId", 0);
-        goodsTitle = getIntent().getStringExtra("goodsTitle");
-        currentUserId = UserSession.getCurrentUser().getUserId();
-
-        tvTitle.setText(otherUserName != null ? otherUserName : "聊天");
-
-        btnSend.setOnClickListener(v -> sendMessage());
-
-        loadMessages();
     }
 
     private void loadMessages() {
         showLoading();
         new Thread(() -> {
-            messageList = MessageDao.getConversationMessages(currentUserId, otherUserId, goodsId);
-            MessageDao.markAsRead(currentUserId, otherUserId, goodsId);
-
-            runOnUiThread(() -> {
-                hideLoading();
-                adapter = new ChatMessageAdapter(this, messageList, currentUserId);
-                recyclerChat.setAdapter(adapter);
-
-                if (!messageList.isEmpty()) {
-                    recyclerChat.scrollToPosition(messageList.size() - 1);
+            try {
+                messageList = MessageDao.getConversationMessages(currentUserId, otherUserId, goodsId);
+                if (messageList == null) {
+                    messageList = new java.util.ArrayList<>();
                 }
-            });
+                MessageDao.markAsRead(currentUserId, otherUserId, goodsId);
+
+                runOnUiThread(() -> {
+                    try {
+                        hideLoading();
+                        adapter = new ChatMessageAdapter(this, messageList, currentUserId);
+                        recyclerChat.setAdapter(adapter);
+
+                        if (!messageList.isEmpty()) {
+                            recyclerChat.scrollToPosition(messageList.size() - 1);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        ToastUtil.show(this, "显示消息失败");
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> {
+                    hideLoading();
+                    ToastUtil.show(this, "加载消息失败：" + e.getMessage());
+                });
+            }
         }).start();
     }
 

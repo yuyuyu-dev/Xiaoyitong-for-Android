@@ -32,18 +32,24 @@ public class MessageDao {
         String sql = "SELECT * FROM Message WHERE " +
                 "((sender_id=? AND receiver_id=?) OR (sender_id=? AND receiver_id=?)) " +
                 "AND goods_id=? ORDER BY create_time ASC";
-        Cursor cursor = db.rawQuery(sql, new String[]{
-                String.valueOf(userId), String.valueOf(otherUserId),
-                String.valueOf(otherUserId), String.valueOf(userId),
-                String.valueOf(goodsId)
-        });
-
+        Cursor cursor = null;
+        
         try {
+            cursor = db.rawQuery(sql, new String[]{
+                    String.valueOf(userId), String.valueOf(otherUserId),
+                    String.valueOf(otherUserId), String.valueOf(userId),
+                    String.valueOf(goodsId)
+            });
+
             while (cursor.moveToNext()) {
                 list.add(mapToMessage(cursor));
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
-            cursor.close();
+            if (cursor != null) {
+                cursor.close();
+            }
         }
         return list;
     }

@@ -1,5 +1,6 @@
-package com.example.schooltrade.ui.goods;
+  package com.example.schooltrade.ui.goods;
 
+import android.content.Intent;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -55,6 +56,14 @@ public class MyCollectActivity extends AppCompatActivity {
                 refreshLayout.setRefreshing(false);
                 adapter = new GoodsAdapter(this, list);
                 recycler.setAdapter(adapter);
+                
+                // 设置点击事件，跳转到商品详情页
+                adapter.setOnItemClickListener(position -> {
+                    Intent intent = new Intent(MyCollectActivity.this, GoodsDetailActivity.class);
+                    intent.putExtra("goodsId", list.get(position).getGoodsId());
+                    startActivity(intent);
+                });
+                
                 if (list.isEmpty()) {
                     ToastUtil.show(this, "暂无收藏商品");
                 }

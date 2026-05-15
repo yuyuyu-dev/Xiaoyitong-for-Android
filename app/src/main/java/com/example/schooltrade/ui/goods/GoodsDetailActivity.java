@@ -60,14 +60,34 @@ public class GoodsDetailActivity extends AppCompatActivity {
         btnContact = findViewById(R.id.btn_contact);
         btnBuy = findViewById(R.id.btn_buy);
 
+        // 确保按钮文字显示
+        if (btnCollect != null) {
+            btnCollect.setText("收藏商品");
+            btnCollect.setVisibility(android.view.View.VISIBLE);
+        }
+        if (btnContact != null) {
+            btnContact.setText("联系卖家");
+            btnContact.setVisibility(android.view.View.VISIBLE);
+        }
+        if (btnBuy != null) {
+            btnBuy.setText("购买商品");
+            btnBuy.setVisibility(android.view.View.VISIBLE);
+        }
+
         // 收藏按钮
-        btnCollect.setOnClickListener(v -> collectGoods());
+        if (btnCollect != null) {
+            btnCollect.setOnClickListener(v -> collectGoods());
+        }
         
         // 联系卖家按钮
-        btnContact.setOnClickListener(v -> contactSeller());
+        if (btnContact != null) {
+            btnContact.setOnClickListener(v -> contactSeller());
+        }
         
         // 购买商品按钮
-        btnBuy.setOnClickListener(v -> buyGoods());
+        if (btnBuy != null) {
+            btnBuy.setOnClickListener(v -> buyGoods());
+        }
     }
 
     /**
@@ -150,11 +170,26 @@ public class GoodsDetailActivity extends AppCompatActivity {
 
     // 检查收藏状态
     private void checkCollectStatus() {
+        if (btnCollect == null) {
+            return;
+        }
+        
         new Thread(() -> {
-            boolean isCollect = CollectDao.isCollect(userId, goodsId);
-            runOnUiThread(() -> {
-                btnCollect.setText(isCollect ? "取消收藏" : "收藏商品");
-            });
+            try {
+                boolean isCollect = CollectDao.isCollect(userId, goodsId);
+                runOnUiThread(() -> {
+                    if (btnCollect != null) {
+                        btnCollect.setText(isCollect ? "取消收藏" : "收藏商品");
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> {
+                    if (btnCollect != null) {
+                        btnCollect.setText("收藏商品");
+                    }
+                });
+            }
         }).start();
     }
 

@@ -37,16 +37,18 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
         holder.tvMessage.setText(message.getContent());
         holder.tvTime.setText(formatTime(message.getCreateTime()));
 
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.llContainer.getLayoutParams();
-
+        // 设置消息气泡位置和背景
         if (message.getSenderId() == currentUserId) {
-            params.gravity = Gravity.END;
+            // 我发送的消息：靠右对齐，蓝色背景
+            holder.llContainer.setGravity(Gravity.END);
             holder.tvMessage.setBackgroundResource(R.drawable.bg_message_sent);
+            holder.tvMessage.setTextColor(android.graphics.Color.WHITE);
         } else {
-            params.gravity = Gravity.START;
+            // 对方发送的消息：靠左对齐，白色背景
+            holder.llContainer.setGravity(Gravity.START);
             holder.tvMessage.setBackgroundResource(R.drawable.bg_message_received);
+            holder.tvMessage.setTextColor(android.graphics.Color.parseColor("#333333"));
         }
-        holder.llContainer.setLayoutParams(params);
     }
 
     private String formatTime(String time) {

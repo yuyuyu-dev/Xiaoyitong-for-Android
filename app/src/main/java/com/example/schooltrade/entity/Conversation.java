@@ -12,6 +12,7 @@ public class Conversation implements Serializable {
     private String lastMessage;
     private String lastMessageTime;
     private int unreadCount;
+    private String otherUserAvatar;
 
     public int getConversationId() { return conversationId; }
     public void setConversationId(int conversationId) { this.conversationId = conversationId; }
@@ -31,4 +32,6 @@ public class Conversation implements Serializable {
     public void setLastMessageTime(String lastMessageTime) { this.lastMessageTime = lastMessageTime; }
     public int getUnreadCount() { return unreadCount; }
     public void setUnreadCount(int unreadCount) { this.unreadCount = unreadCount; }
+    public String getOtherUserAvatar() { return otherUserAvatar; }
+    public void setOtherUserAvatar(String otherUserAvatar) { this.otherUserAvatar = otherUserAvatar; }
 }

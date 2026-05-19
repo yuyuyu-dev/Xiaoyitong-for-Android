@@ -4,10 +4,13 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.example.schooltrade.R;
+import com.example.schooltrade.api.RetrofitClient;
 import com.example.schooltrade.entity.Conversation;
 import java.util.List;
 
@@ -52,6 +55,15 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
             holder.tvUnreadCount.setVisibility(View.GONE);
         }
 
+        // 加载对方头像
+        if (conv.getOtherUserAvatar() != null && !conv.getOtherUserAvatar().isEmpty()) {
+            Glide.with(context).load(RetrofitClient.fullUrl(conv.getOtherUserAvatar()))
+                .placeholder(R.mipmap.ic_launcher)
+                .error(R.mipmap.ic_launcher)
+                .circleCrop()
+                .into(holder.ivAvatar);
+        }
+
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onItemClick(position);
         });
@@ -69,10 +81,12 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
     public int getItemCount() { return list.size(); }
 
     public static class Holder extends RecyclerView.ViewHolder {
+        ImageView ivAvatar;
         TextView tvUsername, tvGoodsTitle, tvLastMessage, tvTime, tvUnreadCount;
 
         public Holder(@NonNull View itemView) {
             super(itemView);
+            ivAvatar = itemView.findViewById(R.id.iv_avatar);
             tvUsername = itemView.findViewById(R.id.tv_username);
             tvGoodsTitle = itemView.findViewById(R.id.tv_goods_title);
             tvLastMessage = itemView.findViewById(R.id.tv_last_message);

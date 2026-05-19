@@ -5,12 +5,17 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import com.example.schooltrade.R;
+import com.example.schooltrade.api.LoginRequest;
+import com.example.schooltrade.api.LoginResponse;
+import com.example.schooltrade.api.Result;
+import com.example.schooltrade.api.RetrofitClient;
 import com.example.schooltrade.base.BaseActivity;
 import com.example.schooltrade.entity.User;
-import com.example.schooltrade.model.db.UserDao;
 import com.example.schooltrade.ui.main.MainActivity;
 import com.example.schooltrade.utils.ToastUtil;
 import com.example.schooltrade.utils.UserSession;
+import java.io.IOException;
+import retrofit2.Response;
 
 public class LoginActivity extends BaseActivity {
     private EditText etAccount, etPwd;
@@ -39,18 +44,37 @@ public class LoginActivity extends BaseActivity {
         }
         showLoading();
         new Thread(() -> {
-            User user = UserDao.login(account, pwd);
-            runOnUiThread(() -> {
-                hideLoading();
-                if (user != null) {
-                    UserSession.setCurrentUser(user);
-                    ToastUtil.show(this, "登录成功");
-                    startActivity(new Intent(this, MainActivity.class));
-                    finish();
-                } else {
-                    ToastUtil.show(this, "账号或密码错误");
-                }
-            });
+            try {
+                Response<Result<LoginResponse>> response = RetrofitClient.getInstance()
+                    .getApiService()
+                    .login(new LoginRequest(account, pwd))
+                    .execute();
+                runOnUiThread(() -> {
+                    hideLoading();
+                    if (response.isSuccessful() && response.body() != null
+                            && response.body().isSuccess()) {
+                        LoginResponse data = response.body().getData();
+                        User user = new User();
+                        user.setUserId(data.getUserId());
+                        user.setAccount(data.getAccount());
+                        user.setRealName(data.getRealName());
+                        user.setAvatarUrl(data.getAvatarUrl());
+                        UserSession.setCurrentUser(user);
+                        UserSession.saveToken(data.getToken());
+                        ToastUtil.show(this, "登录成功");
+                        startActivity(new Intent(this, MainActivity.class));
+                        finish();
+                    } else {
+                        String msg = response.body() != null ? response.body().getMessage() : "登录失败";
+                        ToastUtil.show(this, msg);
+                    }
+                });
+            } catch (IOException e) {
+                runOnUiThread(() -> {
+                    hideLoading();
+                    ToastUtil.show(this, "网络连接失败，请检查服务器是否启动");
+                });
+            }
         }).start();
     }
 

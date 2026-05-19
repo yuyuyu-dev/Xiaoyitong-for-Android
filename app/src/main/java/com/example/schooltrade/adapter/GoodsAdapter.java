@@ -1,17 +1,16 @@
 package com.example.schooltrade.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.example.schooltrade.R;
+import com.example.schooltrade.api.RetrofitClient;
 import com.example.schooltrade.entity.Goods;
 import java.util.List;
 
@@ -87,38 +86,30 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
 
         // 管理模式：显示编辑和删除按钮
         if (isMyPublishMode) {
-            holder.btnEdit.setVisibility(View.VISIBLE);
-            holder.btnDelete.setVisibility(View.VISIBLE);
-
+            holder.divider.setVisibility(View.VISIBLE);
+            holder.llButtons.setVisibility(View.VISIBLE);
             holder.btnEdit.setOnClickListener(v -> {
                 if (listener != null) listener.onEdit(position);
             });
-
             holder.btnDelete.setOnClickListener(v -> {
                 if (listener != null) listener.onDelete(position);
             });
         } else {
-            holder.btnEdit.setVisibility(View.GONE);
-            holder.btnDelete.setVisibility(View.GONE);
+            holder.divider.setVisibility(View.GONE);
+            holder.llButtons.setVisibility(View.GONE);
         }
     }
 
     /**
-     * 加载图片（从文件路径）
+     * 加载图片（网络URL，使用Glide）
      */
     private void loadImage(ImageView imageView, String imagePath) {
         if (imagePath != null && !imagePath.isEmpty()) {
-            try {
-                Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-                if (bitmap != null) {
-                    imageView.setImageBitmap(bitmap);
-                } else {
-                    imageView.setImageResource(R.mipmap.ic_launcher);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                imageView.setImageResource(R.mipmap.ic_launcher);
-            }
+            Glide.with(context)
+                .load(RetrofitClient.fullUrl(imagePath))
+                .placeholder(R.mipmap.ic_launcher)
+                .error(R.mipmap.ic_launcher)
+                .into(imageView);
         } else {
             imageView.setImageResource(R.mipmap.ic_launcher);
         }
@@ -130,7 +121,9 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
     public static class Holder extends RecyclerView.ViewHolder {
         ImageView img;
         TextView title, content, type, price;
-        Button btnEdit, btnDelete;
+        TextView btnEdit, btnDelete;
+        View divider;
+        android.view.ViewGroup llButtons;
 
         public Holder(@NonNull View itemView) {
             super(itemView);
@@ -141,6 +134,8 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
             price = itemView.findViewById(R.id.tv_price);
             btnEdit = itemView.findViewById(R.id.btn_edit);
             btnDelete = itemView.findViewById(R.id.btn_delete);
+            divider = itemView.findViewById(R.id.divider);
+            llButtons = itemView.findViewById(R.id.ll_buttons);
         }
     }
 }

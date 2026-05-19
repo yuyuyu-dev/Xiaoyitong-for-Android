@@ -8,15 +8,13 @@
     android:background="@color/bg_gray"
     tools:context=".ui.login.LoginActivity">
 
-    <!-- 顶部装饰背景 -->
     <View
         android:id="@+id/top_bg"
         android:layout_width="match_parent"
         android:layout_height="280dp"
         android:background="@drawable/bg_gradient_blue"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Logo/标题区域 -->
     <TextView
         android:id="@+id/tv_title"
         android:layout_width="wrap_content"
@@ -28,7 +26,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.35"/>
+        app:layout_constraintVertical_bias="0.35" />
 
     <TextView
         android:id="@+id/tv_subtitle"
@@ -40,15 +38,15 @@
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_title"/>
+        app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
-    <!-- 登录卡片 -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
         app:cardCornerRadius="16dp"
-        app:cardElevation="8dp"
+        app:cardElevation="12dp"
+        app:cardBackgroundColor="#DDFFFFFF"
         app:layout_constraintTop_toBottomOf="@id/top_bg"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -72,7 +70,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text"
-                    android:maxLines="1"/>
+                    android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -89,7 +87,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
-                    android:maxLines="1"/>
+                    android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
@@ -100,7 +98,7 @@
                 android:textSize="16sp"
                 android:layout_marginTop="24dp"
                 app:cornerRadius="12dp"
-                app:backgroundTint="@color/primary_blue"/>
+                app:backgroundTint="@color/primary_blue" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_register"
@@ -112,9 +110,7 @@
                 android:layout_marginTop="12dp"
                 app:cornerRadius="12dp"
                 app:strokeColor="@color/primary_blue"
-                android:textColor="@color/primary_blue"/>
-
+                android:textColor="@color/primary_blue" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

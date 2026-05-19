@@ -14,12 +14,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.schooltrade.R;
 import com.example.schooltrade.adapter.GoodsAdapter;
+import com.example.schooltrade.api.Result;
+import com.example.schooltrade.api.RetrofitClient;
 import com.example.schooltrade.base.BaseFragment;
 import com.example.schooltrade.entity.Goods;
-import com.example.schooltrade.model.db.GoodsDao;
 import com.example.schooltrade.ui.goods.GoodsDetailActivity;
 import com.example.schooltrade.utils.ToastUtil;
+import java.io.IOException;
 import java.util.List;
+import retrofit2.Response;
 
 public class HomeFragment extends BaseFragment {
     private RecyclerView recycler;
@@ -54,18 +57,34 @@ public class HomeFragment extends BaseFragment {
     private void loadAllGoods() {
         showLoading();
         new Thread(() -> {
-            goodsList = GoodsDao.getAllGoods();
-            if (getActivity() == null) return;
-            getActivity().runOnUiThread(() -> {
-                hideLoading();
-                adapter = new GoodsAdapter(mContext, goodsList);
-                recycler.setAdapter(adapter);
-                adapter.setOnItemClickListener(position -> {
-                    Intent intent = new Intent(mContext, GoodsDetailActivity.class);
-                    intent.putExtra("goodsId", goodsList.get(position).getGoodsId());
-                    startActivity(intent);
+            try {
+                Response<Result<List<Goods>>> response = RetrofitClient.getInstance()
+                    .getApiService().getAllGoods().execute();
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(() -> {
+                    hideLoading();
+                    if (response.isSuccessful() && response.body() != null
+                            && response.body().isSuccess()) {
+                        goodsList = response.body().getData();
+                    } else {
+                        goodsList = new java.util.ArrayList<>();
+                        ToastUtil.show(mContext, "加载商品失败");
+                    }
+                    adapter = new GoodsAdapter(mContext, goodsList);
+                    recycler.setAdapter(adapter);
+                    adapter.setOnItemClickListener(position -> {
+                        Intent intent = new Intent(mContext, GoodsDetailActivity.class);
+                        intent.putExtra("goodsId", goodsList.get(position).getGoodsId());
+                        startActivity(intent);
+                    });
                 });
-            });
+            } catch (IOException e) {
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(() -> {
+                    hideLoading();
+                    ToastUtil.show(mContext, "网络连接失败");
+                });
+            }
         }).start();
     }
 
@@ -120,30 +139,47 @@ public class HomeFragment extends BaseFragment {
 
         currentKeyword = keyword.trim();
         showLoading();
-        
+
         new Thread(() -> {
-            List<Goods> searchResults = GoodsDao.searchGoods(currentKeyword);
-            if (getActivity() == null) return;
-            
-            getActivity().runOnUiThread(() -> {
-                hideLoading();
-                
-                if (searchResults == null || searchResults.isEmpty()) {
-                    ToastUtil.show(mContext, "未找到相关商品");
-                    // 显示空列表
-                    adapter = new GoodsAdapter(mContext, searchResults);
-                } else {
-                    ToastUtil.show(mContext, "找到 " + searchResults.size() + " 个相关商品");
-                    adapter = new GoodsAdapter(mContext, searchResults);
-                }
-                
-                recycler.setAdapter(adapter);
-                adapter.setOnItemClickListener(position -> {
-                    Intent intent = new Intent(mContext, GoodsDetailActivity.class);
-                    intent.putExtra("goodsId", searchResults.get(position).getGoodsId());
-                    startActivity(intent);
+            try {
+                Response<Result<List<Goods>>> response = RetrofitClient.getInstance()
+                    .getApiService().searchGoods(currentKeyword).execute();
+                if (getActivity() == null) return;
+
+                getActivity().runOnUiThread(() -> {
+                    hideLoading();
+
+                    List<Goods> results;
+                    if (response.isSuccessful() && response.body() != null
+                            && response.body().isSuccess()) {
+                        results = response.body().getData();
+                        if (results == null || results.isEmpty()) {
+                            ToastUtil.show(mContext, "未找到相关商品");
+                            results = new java.util.ArrayList<>();
+                        } else {
+                            ToastUtil.show(mContext, "找到 " + results.size() + " 个相关商品");
+                        }
+                    } else {
+                        ToastUtil.show(mContext, "搜索失败");
+                        results = new java.util.ArrayList<>();
+                    }
+
+                    final List<Goods> finalResults = results;
+                    adapter = new GoodsAdapter(mContext, finalResults);
+                    recycler.setAdapter(adapter);
+                    adapter.setOnItemClickListener(position -> {
+                        Intent intent = new Intent(mContext, GoodsDetailActivity.class);
+                        intent.putExtra("goodsId", finalResults.get(position).getGoodsId());
+                        startActivity(intent);
+                    });
                 });
-            });
+            } catch (IOException e) {
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(() -> {
+                    hideLoading();
+                    ToastUtil.show(mContext, "网络连接失败");
+                });
+            }
         }).start();
     }
 

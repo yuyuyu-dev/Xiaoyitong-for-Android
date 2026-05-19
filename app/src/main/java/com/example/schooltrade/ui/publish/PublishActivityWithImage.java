@@ -13,12 +13,20 @@ import android.widget.LinearLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.example.schooltrade.R;
+import com.example.schooltrade.api.GoodsRequest;
+import com.example.schooltrade.api.Result;
+import com.example.schooltrade.api.RetrofitClient;
 import com.example.schooltrade.base.BaseActivity;
 import com.example.schooltrade.entity.Goods;
-import com.example.schooltrade.model.db.GoodsDao;
 import com.example.schooltrade.utils.ImageFileUtil;
 import com.example.schooltrade.utils.ToastUtil;
 import com.example.schooltrade.utils.UserSession;
+import java.io.File;
+import java.io.IOException;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Response;
 
 /**
  * 发布商品Activity - 带图片上传功能
@@ -200,7 +208,7 @@ public class PublishActivityWithImage extends BaseActivity {
                 return;
             }
 
-            double price = 0;
+            double price;
             String priceStr = etPrice.getText().toString().trim();
             if (!priceStr.isEmpty()) {
                 try {
@@ -209,6 +217,8 @@ public class PublishActivityWithImage extends BaseActivity {
                     ToastUtil.show(this, "价格格式不正确");
                     return;
                 }
+            } else {
+                price = 0;
             }
 
             if (UserSession.getCurrentUser() == null) {
@@ -217,33 +227,64 @@ public class PublishActivityWithImage extends BaseActivity {
                 return;
             }
 
-            Goods goods = new Goods();
-            goods.setUserId(UserSession.getCurrentUser().getUserId());
-            goods.setTitle(title);
-            goods.setContent(content);
-            goods.setPrice(price);
-            goods.setPublishType(0); // 固定为出售类型
-            goods.setWantGoods(null);
-            goods.setImgUrl(selectedImagePath); // 保存图片路径
-
             showLoading();
             new Thread(() -> {
                 try {
-                    boolean res = GoodsDao.publishGoods(goods);
+                    String imageUrl = "";
+                    // 如果用户选择了图片，先上传
+                    if (selectedImagePath != null && !selectedImagePath.isEmpty()) {
+                        File imageFile = new File(selectedImagePath);
+                        if (imageFile.exists()) {
+                            RequestBody requestFile = RequestBody.create(
+                                MediaType.parse("image/*"), imageFile);
+                            MultipartBody.Part body = MultipartBody.Part.createFormData(
+                                "file", imageFile.getName(), requestFile);
+                            Response<Result<String>> uploadResp = RetrofitClient.getInstance()
+                                .getApiService().uploadImage(body).execute();
+                            if (uploadResp.isSuccessful() && uploadResp.body() != null
+                                    && uploadResp.body().isSuccess()) {
+                                imageUrl = RetrofitClient.fullUrl(uploadResp.body().getData());
+                            } else {
+                                runOnUiThread(() -> {
+                                    hideLoading();
+                                    ToastUtil.show(PublishActivityWithImage.this, "图片上传失败");
+                                });
+                                return;
+                            }
+                        }
+                    }
+
+                    // 发布商品
+                    GoodsRequest goodsReq = new GoodsRequest();
+                    goodsReq.setTitle(title);
+                    goodsReq.setContent(content);
+                    goodsReq.setPrice(price);
+                    goodsReq.setPublishType(0);
+                    goodsReq.setImgUrl(imageUrl);
+
+                    Response<Result<Goods>> goodsResp = RetrofitClient.getInstance()
+                        .getApiService().publishGoods(goodsReq).execute();
+
                     runOnUiThread(() -> {
                         hideLoading();
-                        if (res) {
-                            ToastUtil.show(this, "发布成功");
+                        if (goodsResp.isSuccessful() && goodsResp.body() != null
+                                && goodsResp.body().isSuccess()) {
+                            ToastUtil.show(PublishActivityWithImage.this, "发布成功");
+                            // 清理本地临时文件
+                            if (selectedImagePath != null) {
+                                ImageFileUtil.deleteImage(selectedImagePath);
+                            }
                             finish();
                         } else {
-                            ToastUtil.show(this, "发布失败");
+                            String msg = goodsResp.body() != null
+                                ? goodsResp.body().getMessage() : "发布失败";
+                            ToastUtil.show(PublishActivityWithImage.this, msg);
                         }
                     });
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (IOException e) {
                     runOnUiThread(() -> {
                         hideLoading();
-                        ToastUtil.show(this, "发布异常：" + e.getMessage());
+                        ToastUtil.show(PublishActivityWithImage.this, "网络连接失败");
                     });
                 }
             }).start();

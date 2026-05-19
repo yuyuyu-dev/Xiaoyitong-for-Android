@@ -18,10 +18,11 @@
         android:background="#FFF">
 
         <ImageView
+            android:id="@+id/iv_avatar"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@android:drawable/ic_menu_myplaces"
-            android:padding="10dp"
+            android:src="@mipmap/ic_launcher"
+            android:scaleType="centerCrop"
             android:background="@drawable/bg_avatar_circle" />
 
         <LinearLayout

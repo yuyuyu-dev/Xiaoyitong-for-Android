@@ -18,10 +18,14 @@ import androidx.core.content.ContextCompat;
 import com.example.schooltrade.R;
 import com.example.schooltrade.base.BaseActivity;
 import com.example.schooltrade.entity.Goods;
-import com.example.schooltrade.model.db.GoodsDao;
+import com.example.schooltrade.api.GoodsRequest;
+import com.example.schooltrade.api.Result;
+import com.example.schooltrade.api.RetrofitClient;
 import com.example.schooltrade.utils.ImageUtil;
 import com.example.schooltrade.utils.ToastUtil;
 import com.example.schooltrade.utils.UserSession;
+import java.io.IOException;
+import retrofit2.Response;
 
 public class PublishActivity extends BaseActivity {
     private static final String TAG = "PublishActivity";
@@ -180,7 +184,7 @@ public class PublishActivity extends BaseActivity {
             return;
         }
 
-        double price = 0;
+        double price;
         if (type == 0) {
             String priceStr = etPrice.getText().toString().trim();
             if (!priceStr.isEmpty()) {
@@ -190,37 +194,41 @@ public class PublishActivity extends BaseActivity {
                     ToastUtil.show(this, "价格格式不正确");
                     return;
                 }
+            } else {
+                price = 0;
             }
+        } else {
+            price = 0;
         }
         String want = type == 1 ? etWant.getText().toString().trim() : null;
 
-        Goods goods = new Goods();
-        goods.setUserId(UserSession.getCurrentUser().getUserId());
-        goods.setTitle(title);
-        goods.setContent(content);
-        goods.setPrice(price);
-        goods.setPublishType(type);
-        goods.setWantGoods(want);
-        goods.setImgUrl(selectedImagePath); // 添加图片路径
+        GoodsRequest goodsReq = new GoodsRequest();
+        goodsReq.setTitle(title);
+        goodsReq.setContent(content);
+        goodsReq.setPrice(price);
+        goodsReq.setPublishType(type);
+        goodsReq.setWantGoods(want);
+        goodsReq.setImgUrl(selectedImagePath != null ? selectedImagePath : "");
 
         showLoading();
         new Thread(() -> {
             try {
-                boolean res = GoodsDao.publishGoods(goods);
+                Response<Result<Goods>> response = RetrofitClient.getInstance()
+                    .getApiService().publishGoods(goodsReq).execute();
                 runOnUiThread(() -> {
                     hideLoading();
-                    if (res) {
-                        ToastUtil.show(this, "发布成功");
+                    if (response.isSuccessful() && response.body() != null
+                            && response.body().isSuccess()) {
+                        ToastUtil.show(PublishActivity.this, "发布成功");
                         finish();
                     } else {
-                        ToastUtil.show(this, "发布失败");
+                        ToastUtil.show(PublishActivity.this, "发布失败");
                     }
                 });
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (IOException e) {
                 runOnUiThread(() -> {
                     hideLoading();
-                    ToastUtil.show(this, "发布异常：" + e.getMessage());
+                    ToastUtil.show(PublishActivity.this, "网络连接失败");
                 });
             }
         }).start();

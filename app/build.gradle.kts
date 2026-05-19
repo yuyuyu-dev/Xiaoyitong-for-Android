@@ -56,4 +56,7 @@ dependencies {
 
     // Glide (图片加载)
     implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    // ViewPager2 (Banner轮播)
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
 }

@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment;
 import com.example.schooltrade.R;
 import com.example.schooltrade.base.BaseActivity;
 import com.example.schooltrade.ui.message.MessageFragment;
-import com.example.schooltrade.ui.publish.PublishActivityWithImage;
+import com.example.schooltrade.ui.publish.PublishActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends BaseActivity {
@@ -31,7 +31,7 @@ public class MainActivity extends BaseActivity {
                 getSupportFragmentManager().beginTransaction().replace(R.id.container, messageFragment).commit();
                 return true;
             } else if (item.getItemId() == R.id.nav_publish) {
-                startActivity(new Intent(MainActivity.this, PublishActivityWithImage.class));
+                startActivity(new Intent(MainActivity.this, PublishActivity.class));
                 nav.setSelectedItemId(R.id.nav_home);
                 return true;
             } else if (item.getItemId() == R.id.nav_mine) {

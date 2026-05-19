@@ -61,6 +61,10 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
         return new Holder(view);
     }
 
+    private static final String[] CATEGORY_NAMES = {
+        "", "教材书籍", "数码产品", "生活用品", "服饰鞋包", "运动器材", "其他"
+    };
+
     @Override
     public void onBindViewHolder(@NonNull Holder holder, int position) {
         Goods g = list.get(position);
@@ -74,6 +78,23 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
         } else {
             holder.type.setText("置换");
             holder.price.setText("置换");
+        }
+
+        // 分类标签
+        if (g.getCategory() > 0 && g.getCategory() < CATEGORY_NAMES.length) {
+            holder.tvCategory.setText(CATEGORY_NAMES[g.getCategory()]);
+            holder.tvCategory.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvCategory.setVisibility(View.GONE);
+        }
+
+        // 已卖出印章 (status != 1 即为已售出/已下架)
+        boolean isSold = (g.getStatus() != 1);
+        if (holder.soldOverlay != null) {
+            holder.soldOverlay.setVisibility(isSold ? View.VISIBLE : View.GONE);
+        }
+        if (holder.tvSoldStamp != null) {
+            holder.tvSoldStamp.setVisibility(isSold ? View.VISIBLE : View.GONE);
         }
 
         // 加载商品图片
@@ -120,7 +141,9 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
 
     public static class Holder extends RecyclerView.ViewHolder {
         ImageView img;
-        TextView title, content, type, price;
+        TextView title, content, type, price, tvCategory;
+        View soldOverlay;
+        TextView tvSoldStamp;
         TextView btnEdit, btnDelete;
         View divider;
         android.view.ViewGroup llButtons;
@@ -132,6 +155,9 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
             content = itemView.findViewById(R.id.tv_content);
             type = itemView.findViewById(R.id.tv_type);
             price = itemView.findViewById(R.id.tv_price);
+            tvCategory = itemView.findViewById(R.id.tv_category);
+            soldOverlay = itemView.findViewById(R.id.sold_overlay);
+            tvSoldStamp = itemView.findViewById(R.id.tv_sold_stamp);
             btnEdit = itemView.findViewById(R.id.btn_edit);
             btnDelete = itemView.findViewById(R.id.btn_delete);
             divider = itemView.findViewById(R.id.divider);

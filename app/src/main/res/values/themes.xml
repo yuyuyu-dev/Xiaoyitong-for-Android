@@ -13,4 +13,10 @@
     </style>
 
     <style name="Theme.SchoolTrade" parent="Base.Theme.SchoolTrade" />
+
+    <!-- 启动页：全屏无标题栏 -->
+    <style name="Theme.Splash" parent="Theme.Material3.Light.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">@drawable/first</item>
+    </style>
 </resources>

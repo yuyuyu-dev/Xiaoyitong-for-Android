@@ -53,8 +53,8 @@ public class MineFragment extends BaseFragment {
             // 加载头像
             if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
                 Glide.with(mContext).load(RetrofitClient.fullUrl(user.getAvatarUrl()))
-                    .placeholder(R.mipmap.ic_launcher)
-                    .error(R.mipmap.ic_launcher)
+                    .placeholder(R.drawable.bg_image_placeholder)
+                    .error(R.drawable.bg_image_placeholder)
                     .circleCrop()
                     .into(ivAvatar);
             }

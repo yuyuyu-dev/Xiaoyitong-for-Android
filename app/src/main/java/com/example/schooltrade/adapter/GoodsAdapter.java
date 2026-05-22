@@ -128,11 +128,11 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
         if (imagePath != null && !imagePath.isEmpty()) {
             Glide.with(context)
                 .load(RetrofitClient.fullUrl(imagePath))
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
+                .placeholder(R.drawable.bg_image_placeholder)
+                .error(R.drawable.bg_image_placeholder)
                 .into(imageView);
         } else {
-            imageView.setImageResource(R.mipmap.ic_launcher);
+            imageView.setImageResource(R.drawable.bg_image_placeholder);
         }
     }
 

@@ -68,8 +68,8 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
     private void loadAvatar(ImageView iv, String url) {
         if (url != null && !url.isEmpty()) {
             Glide.with(context).load(RetrofitClient.fullUrl(url))
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
+                .placeholder(R.drawable.bg_image_placeholder)
+                .error(R.drawable.bg_image_placeholder)
                 .circleCrop()
                 .into(iv);
         }

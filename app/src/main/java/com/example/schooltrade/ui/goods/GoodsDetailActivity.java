@@ -272,11 +272,11 @@ public class GoodsDetailActivity extends AppCompatActivity {
         if (imagePath != null && !imagePath.isEmpty()) {
             Glide.with(this)
                 .load(RetrofitClient.fullUrl(imagePath))
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
+                .placeholder(R.drawable.bg_image_placeholder)
+                .error(R.drawable.bg_image_placeholder)
                 .into(ivGoodsImage);
         } else {
-            ivGoodsImage.setImageResource(R.mipmap.ic_launcher);
+            ivGoodsImage.setImageResource(R.drawable.bg_image_placeholder);
         }
     }
 

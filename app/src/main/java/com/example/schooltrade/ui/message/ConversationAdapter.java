@@ -58,8 +58,8 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         // 加载对方头像
         if (conv.getOtherUserAvatar() != null && !conv.getOtherUserAvatar().isEmpty()) {
             Glide.with(context).load(RetrofitClient.fullUrl(conv.getOtherUserAvatar()))
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
+                .placeholder(R.drawable.bg_image_placeholder)
+                .error(R.drawable.bg_image_placeholder)
                 .circleCrop()
                 .into(holder.ivAvatar);
         }

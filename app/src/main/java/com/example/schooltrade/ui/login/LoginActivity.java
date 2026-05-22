@@ -59,8 +59,7 @@ public class LoginActivity extends BaseActivity {
                         user.setAccount(data.getAccount());
                         user.setRealName(data.getRealName());
                         user.setAvatarUrl(data.getAvatarUrl());
-                        UserSession.setCurrentUser(user);
-                        UserSession.saveToken(data.getToken());
+                        UserSession.saveLogin(user, data.getToken());
                         ToastUtil.show(this, "登录成功");
                         startActivity(new Intent(this, MainActivity.class));
                         finish();

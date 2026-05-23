@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout android:fitsSystemWindows="true" xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/bg_gray">
 
-    <!-- 顶部导航栏 -->
+    <!-- 蓝色顶部栏 -->
     <LinearLayout
-        android:layout_width="match_parent"
+    android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:orientation="horizontal"
+        android:background="@drawable/bg_gradient_blue"
         android:gravity="center_vertical"
-        android:paddingHorizontal="16dp"
-        android:background="@color/white"
+        android:paddingHorizontal="12dp"
         android:elevation="4dp">
 
         <ImageView
@@ -20,6 +20,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@android:drawable/ic_menu_revert"
+            android:tint="@color/white"
             android:padding="8dp"
             android:clickable="true"
             android:focusable="true"
@@ -30,24 +31,21 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="商品详情"
-            android:textSize="18sp"
+            android:textSize="19sp"
             android:textStyle="bold"
-            android:textColor="@color/text_primary"
-            android:gravity="center" />
-
-        <View
-            android:layout_width="40dp"
-            android:layout_height="40dp" />
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:layout_marginEnd="40dp" />
     </LinearLayout>
 
     <!-- 内容区域 -->
     <ScrollView
-        android:layout_width="match_parent"
+    android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
 
         <LinearLayout
-            android:layout_width="match_parent"
+    android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
@@ -55,7 +53,7 @@
             <!-- 商品图片 -->
             <ImageView
                 android:id="@+id/iv_goods_image"
-                android:layout_width="match_parent"
+    android:layout_width="match_parent"
                 android:layout_height="250dp"
                 android:scaleType="centerCrop"
                 android:background="#F5F5F5"
@@ -64,7 +62,7 @@
             <!-- 商品标题 -->
             <TextView
                 android:id="@+id/tv_title"
-                android:layout_width="match_parent"
+    android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="20sp"
                 android:textStyle="bold"
@@ -74,7 +72,7 @@
             <!-- 价格 -->
             <TextView
                 android:id="@+id/tv_price"
-                android:layout_width="match_parent"
+    android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="24sp"
                 android:textStyle="bold"
@@ -84,7 +82,7 @@
             <!-- 发布者信息 -->
             <TextView
                 android:id="@+id/tv_user"
-                android:layout_width="match_parent"
+    android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
                 android:textColor="@color/text_secondary"
@@ -93,7 +91,7 @@
             <!-- 商品类型 -->
             <TextView
                 android:id="@+id/tv_type"
-                android:layout_width="match_parent"
+    android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
                 android:textColor="@color/text_secondary"
@@ -101,14 +99,14 @@
 
             <!-- 分割线 -->
             <View
-                android:layout_width="match_parent"
+    android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="#E0E0E0"
                 android:layout_marginBottom="16dp"/>
 
             <!-- 商品描述 -->
             <TextView
-                android:layout_width="match_parent"
+    android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="商品描述"
                 android:textSize="16sp"
@@ -118,7 +116,7 @@
 
             <TextView
                 android:id="@+id/tv_content"
-                android:layout_width="match_parent"
+    android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="15sp"
                 android:textColor="@color/text_primary"
@@ -127,63 +125,58 @@
 
             <!-- 底部按钮区域 -->
             <LinearLayout
-                android:layout_width="match_parent"
+    android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginBottom="16dp">
 
-                <!-- 第一行：购买商品 + 联系卖家 -->
                 <LinearLayout
-                    android:layout_width="match_parent"
+    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
                     <Button
                         android:id="@+id/btn_buy"
                         android:layout_width="0dp"
-                        android:layout_height="52dp"
+                        android:layout_height="54dp"
                         android:layout_weight="1"
                         android:text="购买商品"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:background="@drawable/bg_button_primary"
                         android:textColor="@color/white"
-                        android:elevation="2dp"
+                        android:elevation="3dp"
                         android:stateListAnimator="@null"
                         android:layout_marginEnd="8dp"/>
 
                     <Button
                         android:id="@+id/btn_contact"
                         android:layout_width="0dp"
-                        android:layout_height="52dp"
+                        android:layout_height="54dp"
                         android:layout_weight="1"
                         android:text="联系卖家"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:background="@drawable/bg_button_gradient"
                         android:textColor="@color/white"
-                        android:elevation="2dp"
+                        android:elevation="3dp"
                         android:stateListAnimator="@null"
                         android:layout_marginStart="8dp"/>
                 </LinearLayout>
 
-                <!-- 第二行：收藏商品 -->
                 <Button
                     android:id="@+id/btn_collect"
-                    style="@style/Widget.AppCompat.Button.Borderless"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
+    android:layout_width="match_parent"
+                    android:layout_height="54dp"
                     android:layout_marginTop="12dp"
                     android:text="收藏商品"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#2196F3"
                     android:background="@drawable/bg_button_outline"
+                    app:backgroundTint="@null"
                     android:elevation="2dp"
-                    android:stateListAnimator="@null"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:gravity="center"/>
+                    android:stateListAnimator="@null" />
             </LinearLayout>
 
         </LinearLayout>

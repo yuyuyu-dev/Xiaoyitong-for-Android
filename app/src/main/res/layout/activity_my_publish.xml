@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout android:fitsSystemWindows="true" xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/bg_gray">
 
-    <!-- 顶部导航栏 -->
+    <!-- 蓝色顶部栏 -->
     <LinearLayout
-        android:layout_width="match_parent"
+    android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:orientation="horizontal"
+        android:background="@drawable/bg_gradient_blue"
         android:gravity="center_vertical"
-        android:paddingHorizontal="16dp"
-        android:background="@color/white"
+        android:paddingHorizontal="12dp"
         android:elevation="4dp">
 
         <ImageView
@@ -22,6 +20,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@android:drawable/ic_menu_revert"
+            android:tint="@color/white"
             android:padding="8dp"
             android:clickable="true"
             android:focusable="true"
@@ -32,20 +31,17 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="我的发布"
-            android:textSize="18sp"
+            android:textSize="19sp"
             android:textStyle="bold"
-            android:textColor="@color/text_primary"
-            android:gravity="center" />
-
-        <View
-            android:layout_width="40dp"
-            android:layout_height="40dp" />
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:layout_marginEnd="40dp" />
     </LinearLayout>
 
     <!-- 商品列表 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_my"
-        android:layout_width="match_parent"
+    android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="8dp"
         android:clipToPadding="false" />

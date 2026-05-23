@@ -1,6 +1,7 @@
 package com.example.schooltrade.ui.main;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -9,147 +10,235 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
-import androidx.appcompat.widget.Toolbar;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.schooltrade.R;
 import com.example.schooltrade.adapter.GoodsAdapter;
+import com.example.schooltrade.api.Result;
+import com.example.schooltrade.api.RetrofitClient;
 import com.example.schooltrade.base.BaseFragment;
 import com.example.schooltrade.entity.Goods;
-import com.example.schooltrade.model.db.GoodsDao;
 import com.example.schooltrade.ui.goods.GoodsDetailActivity;
 import com.example.schooltrade.utils.ToastUtil;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Response;
+
 public class HomeFragment extends BaseFragment {
+
+    private static final String[] CATEGORY_NAMES = {
+        "全部分类", "教材书籍", "数码产品", "生活用品", "服饰鞋包", "运动器材", "其他"
+    };
+
+    private LinearLayout llCategories;
+    private TextView tvResultCount;
+    private TextView btnSortTime;
+    private TextView btnSortPrice;
     private RecyclerView recycler;
     private GoodsAdapter adapter;
-    private List<Goods> goodsList;
+    private List<Goods> goodsList = new ArrayList<>();
     private EditText etSearch;
     private ImageView btnClearSearch;
-    private String currentKeyword = "";
+
+    private int currentCategory = 0;
+    private String currentSort = "time";
+    private boolean priceAsc = true;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
-        
-        // 1. 初始化 Toolbar
-        Toolbar toolbar = view.findViewById(R.id.toolbar);
-        // 由于是在 Fragment 中，Toolbar 已经通过布局设置了标题
 
-        // 2. 初始化搜索框
+        llCategories = view.findViewById(R.id.ll_categories);
+        tvResultCount = view.findViewById(R.id.tv_result_count);
+        btnSortTime = view.findViewById(R.id.btn_sort_time);
+        btnSortPrice = view.findViewById(R.id.btn_sort_price);
+        recycler = view.findViewById(R.id.recycler);
         etSearch = view.findViewById(R.id.et_search);
         btnClearSearch = view.findViewById(R.id.btn_clear_search);
-        initSearch();
 
-        // 3. 初始化列表
-        recycler = view.findViewById(R.id.recycler);
         recycler.setLayoutManager(new LinearLayoutManager(mContext));
 
-        loadAllGoods();
+        initSearch();
+        initCategories();
+        initSort();
+        loadGoods();
+
         return view;
     }
 
-    // 加载所有商品
-    private void loadAllGoods() {
-        showLoading();
-        new Thread(() -> {
-            goodsList = GoodsDao.getAllGoods();
-            if (getActivity() == null) return;
-            getActivity().runOnUiThread(() -> {
-                hideLoading();
-                adapter = new GoodsAdapter(mContext, goodsList);
-                recycler.setAdapter(adapter);
-                adapter.setOnItemClickListener(position -> {
-                    Intent intent = new Intent(mContext, GoodsDetailActivity.class);
-                    intent.putExtra("goodsId", goodsList.get(position).getGoodsId());
-                    startActivity(intent);
-                });
+    // ── 分类标签栏 ──
+    private void initCategories() {
+        for (int i = 0; i < CATEGORY_NAMES.length; i++) {
+            TextView chip = new TextView(mContext);
+            chip.setText(CATEGORY_NAMES[i]);
+            chip.setId(View.generateViewId());
+            chip.setTextSize(13);
+            chip.setPadding(24, 10, 24, 10);
+            chip.setClickable(true);
+            chip.setFocusable(true);
+
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            lp.setMargins(i == 0 ? 0 : 8, 0, 8, 0);
+            chip.setLayoutParams(lp);
+            chip.setBackgroundResource(R.drawable.bg_category_chip);
+
+            final int idx = i;
+            chip.setOnClickListener(v -> {
+                currentCategory = idx;
+                updateCategoryChips();
+                loadGoods();
             });
-        }).start();
+            llCategories.addView(chip);
+        }
+        updateCategoryChips();
     }
 
-    // 初始化搜索功能
-    private void initSearch() {
-        // 监听输入框变化
-        etSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+    private void updateCategoryChips() {
+        for (int i = 0; i < llCategories.getChildCount(); i++) {
+            TextView chip = (TextView) llCategories.getChildAt(i);
+            boolean selected = (i == currentCategory);
+            chip.setSelected(selected);
+            chip.setTextColor(selected ? Color.WHITE : Color.parseColor("#666666"));
+        }
+    }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // 显示/隐藏清空按钮
-                if (s != null && s.length() > 0) {
-                    btnClearSearch.setVisibility(View.VISIBLE);
-                } else {
-                    btnClearSearch.setVisibility(View.GONE);
-                }
-            }
+    // ── 排序 ──
+    private void initSort() {
+        btnSortTime.setSelected(true);
+        btnSortTime.setTextColor(Color.WHITE);
 
-            @Override
-            public void afterTextChanged(Editable s) {
-                // 实时搜索（可选，如果需要实时搜索可以取消注释）
-                // performSearch(s.toString());
-            }
+        btnSortTime.setOnClickListener(v -> {
+            currentSort = "time";
+            btnSortTime.setSelected(true);
+            btnSortTime.setTextColor(Color.WHITE);
+            btnSortPrice.setSelected(false);
+            btnSortPrice.setTextColor(Color.parseColor("#757575"));
+            btnSortPrice.setText("价格↑");
+            priceAsc = true;
+            loadGoods();
         });
 
-        // 监听搜索按钮（键盘上的搜索键）
+        btnSortPrice.setOnClickListener(v -> {
+            if (priceAsc) {
+                currentSort = "price_asc";
+                btnSortPrice.setText("价格↑");
+            } else {
+                currentSort = "price_desc";
+                btnSortPrice.setText("价格↓");
+            }
+            priceAsc = !priceAsc;
+            btnSortPrice.setSelected(true);
+            btnSortPrice.setTextColor(Color.WHITE);
+            btnSortTime.setSelected(false);
+            btnSortTime.setTextColor(Color.parseColor("#757575"));
+            loadGoods();
+        });
+    }
+
+    // ── 搜索 ──
+    private void initSearch() {
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                btnClearSearch.setVisibility(s != null && s.length() > 0 ? View.VISIBLE : View.GONE);
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
         etSearch.setOnEditorActionListener((v, actionId, event) -> {
             String keyword = etSearch.getText().toString().trim();
-            if (!keyword.isEmpty()) {
-                performSearch(keyword);
-            }
+            if (!keyword.isEmpty()) performSearch(keyword);
             return false;
         });
 
-        // 清空按钮点击事件
         btnClearSearch.setOnClickListener(v -> {
             etSearch.setText("");
-            currentKeyword = "";
-            loadAllGoods();
-            ToastUtil.show(mContext, "已清空搜索");
+            loadGoods();
         });
     }
 
-    // 执行搜索
     private void performSearch(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            ToastUtil.show(mContext, "请输入搜索关键词");
-            return;
-        }
-
-        currentKeyword = keyword.trim();
+        if (keyword.isEmpty()) return;
         showLoading();
-        
         new Thread(() -> {
-            List<Goods> searchResults = GoodsDao.searchGoods(currentKeyword);
-            if (getActivity() == null) return;
-            
-            getActivity().runOnUiThread(() -> {
-                hideLoading();
-                
-                if (searchResults == null || searchResults.isEmpty()) {
-                    ToastUtil.show(mContext, "未找到相关商品");
-                    // 显示空列表
-                    adapter = new GoodsAdapter(mContext, searchResults);
-                } else {
-                    ToastUtil.show(mContext, "找到 " + searchResults.size() + " 个相关商品");
-                    adapter = new GoodsAdapter(mContext, searchResults);
-                }
-                
-                recycler.setAdapter(adapter);
-                adapter.setOnItemClickListener(position -> {
-                    Intent intent = new Intent(mContext, GoodsDetailActivity.class);
-                    intent.putExtra("goodsId", searchResults.get(position).getGoodsId());
-                    startActivity(intent);
+            try {
+                Response<Result<List<Goods>>> response = RetrofitClient.getInstance()
+                    .getApiService().searchGoods(keyword).execute();
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(() -> {
+                    hideLoading();
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        goodsList = response.body().getData();
+                        if (goodsList == null) goodsList = new ArrayList<>();
+                    } else {
+                        ToastUtil.show(mContext, "搜索失败");
+                    }
+                    updateList();
                 });
-            });
+            } catch (IOException e) {
+                safeUi(() -> { hideLoading(); ToastUtil.show(mContext, "网络连接失败"); });
+            }
         }).start();
+    }
+
+    // ── 加载商品 ──
+    private void loadGoods() {
+        showLoading();
+        new Thread(() -> {
+            try {
+                Response<Result<List<Goods>>> response = RetrofitClient.getInstance()
+                    .getApiService().getAllGoods(
+                        currentCategory > 0 ? currentCategory : null,
+                        currentSort
+                    ).execute();
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(() -> {
+                    hideLoading();
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        goodsList = response.body().getData();
+                        if (goodsList == null) goodsList = new ArrayList<>();
+                    } else {
+                        goodsList = new ArrayList<>();
+                        ToastUtil.show(mContext, "加载失败");
+                    }
+                    updateList();
+                });
+            } catch (IOException e) {
+                safeUi(() -> { hideLoading(); ToastUtil.show(mContext, "网络连接失败"); });
+            }
+        }).start();
+    }
+
+    private void updateList() {
+        tvResultCount.setText(
+            (currentCategory > 0 ? CATEGORY_NAMES[currentCategory] : "全部商品")
+            + " · " + goodsList.size() + " 件"
+        );
+        adapter = new GoodsAdapter(mContext, goodsList);
+        recycler.setAdapter(adapter);
+        adapter.setOnItemClickListener(position -> {
+            Intent intent = new Intent(mContext, GoodsDetailActivity.class);
+            intent.putExtra("goodsId", goodsList.get(position).getGoodsId());
+            startActivity(intent);
+        });
+    }
+
+    private void safeUi(Runnable action) {
+        if (getActivity() == null) return;
+        getActivity().runOnUiThread(action);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        loadAllGoods();
+        loadGoods();
     }
 }

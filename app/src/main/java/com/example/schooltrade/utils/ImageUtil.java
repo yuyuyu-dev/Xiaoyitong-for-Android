@@ -8,7 +8,7 @@ import java.io.ByteArrayOutputStream;
 
 public class ImageUtil {
     public static void loadImage(ImageView iv, String url) {
-        iv.setImageResource(R.mipmap.ic_launcher);
+        iv.setImageResource(R.drawable.bg_image_placeholder);
     }
 
     /**

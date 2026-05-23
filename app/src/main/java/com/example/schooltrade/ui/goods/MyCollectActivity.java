@@ -9,12 +9,14 @@ import android.os.Bundle;
 import android.widget.ImageView;
 import com.example.schooltrade.R;
 import com.example.schooltrade.adapter.GoodsAdapter;
-import com.example.schooltrade.model.db.CollectDao;
-import com.example.schooltrade.model.db.DBUtil;
+import com.example.schooltrade.api.Result;
+import com.example.schooltrade.api.RetrofitClient;
 import com.example.schooltrade.entity.Goods;
 import com.example.schooltrade.utils.ToastUtil;
 import com.example.schooltrade.utils.UserSession;
+import java.io.IOException;
 import java.util.List;
+import retrofit2.Response;
 
 public class MyCollectActivity extends AppCompatActivity {
     private SwipeRefreshLayout refreshLayout;
@@ -25,8 +27,7 @@ public class MyCollectActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // 初始化数据库
-        DBUtil.init(this);
+        UserSession.init(getApplicationContext());
         setContentView(R.layout.activity_my_collect);
         userId = UserSession.getCurrentUser().getUserId();
         initView();
@@ -51,23 +52,36 @@ public class MyCollectActivity extends AppCompatActivity {
     // 加载收藏商品
     private void loadCollectData() {
         new Thread(() -> {
-            List<Goods> list = CollectDao.getMyCollect(userId);
-            runOnUiThread(() -> {
-                refreshLayout.setRefreshing(false);
-                adapter = new GoodsAdapter(this, list);
-                recycler.setAdapter(adapter);
-                
-                // 设置点击事件，跳转到商品详情页
-                adapter.setOnItemClickListener(position -> {
-                    Intent intent = new Intent(MyCollectActivity.this, GoodsDetailActivity.class);
-                    intent.putExtra("goodsId", list.get(position).getGoodsId());
-                    startActivity(intent);
+            try {
+                Response<Result<List<Goods>>> response = RetrofitClient.getInstance()
+                    .getApiService().getMyCollect(userId).execute();
+                runOnUiThread(() -> {
+                    refreshLayout.setRefreshing(false);
+                    if (response.isSuccessful() && response.body() != null
+                            && response.body().isSuccess()) {
+                        List<Goods> list = response.body().getData();
+                        adapter = new GoodsAdapter(MyCollectActivity.this, list);
+                        recycler.setAdapter(adapter);
+
+                        adapter.setOnItemClickListener(position -> {
+                            Intent intent = new Intent(MyCollectActivity.this, GoodsDetailActivity.class);
+                            intent.putExtra("goodsId", list.get(position).getGoodsId());
+                            startActivity(intent);
+                        });
+
+                        if (list.isEmpty()) {
+                            ToastUtil.show(MyCollectActivity.this, "暂无收藏商品");
+                        }
+                    } else {
+                        ToastUtil.show(MyCollectActivity.this, "加载失败");
+                    }
                 });
-                
-                if (list.isEmpty()) {
-                    ToastUtil.show(this, "暂无收藏商品");
-                }
-            });
+            } catch (IOException e) {
+                runOnUiThread(() -> {
+                    refreshLayout.setRefreshing(false);
+                    ToastUtil.show(MyCollectActivity.this, "网络连接失败");
+                });
+            }
         }).start();
     }
 }

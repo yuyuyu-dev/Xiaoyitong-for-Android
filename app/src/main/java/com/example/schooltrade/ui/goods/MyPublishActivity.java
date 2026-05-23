@@ -10,12 +10,15 @@ import android.os.Bundle;
 import android.widget.ImageView;
 import com.example.schooltrade.R;
 import com.example.schooltrade.adapter.GoodsAdapter;
+import com.example.schooltrade.api.Result;
+import com.example.schooltrade.api.RetrofitClient;
 import com.example.schooltrade.base.BaseActivity;
 import com.example.schooltrade.entity.Goods;
-import com.example.schooltrade.model.db.GoodsDao;
 import com.example.schooltrade.utils.UserSession;
 import com.example.schooltrade.utils.ToastUtil;
+import java.io.IOException;
 import java.util.List;
+import retrofit2.Response;
 
 public class MyPublishActivity extends BaseActivity {
     private RecyclerView recyclerMy;
@@ -55,50 +58,84 @@ public class MyPublishActivity extends BaseActivity {
     private void loadMyGoods() {
         showLoading();
         new Thread(() -> {
-            myGoodsList = GoodsDao.getMyGoods(userId);
-            runOnUiThread(() -> {
-                hideLoading();
-                if (myGoodsList.isEmpty()) ToastUtil.show(this, "暂无发布商品");
-                // 使用管理模式（第二个参数为true）
-                adapter = new GoodsAdapter(this, myGoodsList, true);
-                recyclerMy.setAdapter(adapter);
-
-                adapter.setOnGoodsClickListener(new GoodsAdapter.OnGoodsClickListener() {
-                    @Override
-                    public void onEdit(int position) {
-                        Intent intent = new Intent(MyPublishActivity.this, EditGoodsActivity.class);
-                        intent.putExtra("goodsId", myGoodsList.get(position).getGoodsId());
-                        editLauncher.launch(intent);
+            try {
+                Response<Result<List<Goods>>> response = RetrofitClient.getInstance()
+                    .getApiService().getMyGoods(userId).execute();
+                runOnUiThread(() -> {
+                    hideLoading();
+                    if (response.isSuccessful() && response.body() != null
+                            && response.body().isSuccess()) {
+                        myGoodsList = response.body().getData();
+                    } else {
+                        myGoodsList = new java.util.ArrayList<>();
                     }
+                    if (myGoodsList.isEmpty()) ToastUtil.show(this, "暂无发布商品");
+                    adapter = new GoodsAdapter(this, myGoodsList, true);
+                    recyclerMy.setAdapter(adapter);
 
-                    @Override
-                    public void onDelete(int position) {
-                        new AlertDialog.Builder(MyPublishActivity.this)
-                                .setTitle("提示")
-                                .setMessage("确定删除？")
-                                .setPositiveButton("确定", (d, w) -> delGoods(position))
-                                .setNegativeButton("取消", null)
-                                .show();
-                    }
+                    adapter.setOnGoodsClickListener(new GoodsAdapter.OnGoodsClickListener() {
+                        @Override
+                        public void onEdit(int position) {
+                            Goods g = myGoodsList.get(position);
+                            if (g.getStatus() != 1) {
+                                ToastUtil.show(MyPublishActivity.this, "已售出商品不可修改");
+                                return;
+                            }
+                            Intent intent = new Intent(MyPublishActivity.this, EditGoodsActivity.class);
+                            intent.putExtra("goodsId", g.getGoodsId());
+                            editLauncher.launch(intent);
+                        }
+
+                        @Override
+                        public void onDelete(int position) {
+                            Goods g = myGoodsList.get(position);
+                            if (g.getStatus() != 1) {
+                                ToastUtil.show(MyPublishActivity.this, "已售出商品不可删除");
+                                return;
+                            }
+                            String title = g.getTitle();
+                            new AlertDialog.Builder(MyPublishActivity.this)
+                                    .setTitle("确认删除")
+                                    .setMessage("确定要删除「" + title + "」吗？\n删除后无法恢复。")
+                                    .setPositiveButton("删除", (d, w) -> delGoods(position))
+                                    .setNegativeButton("取消", null)
+                                    .show();
+                        }
+                    });
                 });
-            });
+            } catch (IOException e) {
+                runOnUiThread(() -> {
+                    hideLoading();
+                    ToastUtil.show(MyPublishActivity.this, "网络连接失败");
+                });
+            }
         }).start();
     }
 
     private void delGoods(int position) {
         showLoading();
         new Thread(() -> {
-            boolean res = GoodsDao.deleteGoods(myGoodsList.get(position).getGoodsId());
-            runOnUiThread(() -> {
-                hideLoading();
-                if (res) {
-                    ToastUtil.show(this, "删除成功");
-                    myGoodsList.remove(position);
-                    adapter.notifyItemRemoved(position);
-                } else {
-                    ToastUtil.show(this, "删除失败");
-                }
-            });
+            try {
+                Response<Result<String>> response = RetrofitClient.getInstance()
+                    .getApiService().deleteGoods(myGoodsList.get(position).getGoodsId())
+                    .execute();
+                runOnUiThread(() -> {
+                    hideLoading();
+                    if (response.isSuccessful() && response.body() != null
+                            && response.body().isSuccess()) {
+                        ToastUtil.show(MyPublishActivity.this, "删除成功");
+                        myGoodsList.remove(position);
+                        adapter.notifyItemRemoved(position);
+                    } else {
+                        ToastUtil.show(MyPublishActivity.this, "删除失败");
+                    }
+                });
+            } catch (IOException e) {
+                runOnUiThread(() -> {
+                    hideLoading();
+                    ToastUtil.show(MyPublishActivity.this, "网络连接失败");
+                });
+            }
         }).start();
     }
 }

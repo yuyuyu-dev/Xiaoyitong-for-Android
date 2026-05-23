@@ -2,20 +2,22 @@ package com.example.schooltrade.ui.goods;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RadioGroup;
 import com.example.schooltrade.R;
+import com.example.schooltrade.api.GoodsRequest;
+import com.example.schooltrade.api.Result;
+import com.example.schooltrade.api.RetrofitClient;
 import com.example.schooltrade.base.BaseActivity;
 import com.example.schooltrade.entity.Goods;
-import com.example.schooltrade.model.db.GoodsDao;
 import com.example.schooltrade.utils.ToastUtil;
+import com.example.schooltrade.utils.UserSession;
+import java.io.IOException;
+import retrofit2.Response;
 
 public class EditGoodsActivity extends BaseActivity {
-    private EditText etTitle, etContent, etPrice, etWant;
-    private RadioGroup rgType;
-    private int goodsId, type = 0;
+    private EditText etTitle, etContent, etPrice;
+    private int goodsId;
     private Goods currentGoods;
 
     @Override
@@ -26,22 +28,8 @@ public class EditGoodsActivity extends BaseActivity {
         etTitle = findViewById(R.id.et_title);
         etContent = findViewById(R.id.et_content);
         etPrice = findViewById(R.id.et_price);
-        etWant = findViewById(R.id.et_want);
-        rgType = findViewById(R.id.rg_type);
         Button btnSave = findViewById(R.id.btn_save);
         goodsId = getIntent().getIntExtra("goodsId", 0);
-
-        rgType.setOnCheckedChangeListener((group, id) -> {
-            if (id == R.id.rb_sell) {
-                type = 0;
-                etPrice.setVisibility(View.VISIBLE);
-                etWant.setVisibility(View.GONE);
-            } else {
-                type = 1;
-                etWant.setVisibility(View.VISIBLE);
-                etPrice.setVisibility(View.GONE);
-            }
-        });
 
         btnSave.setOnClickListener(v -> saveEdit());
     }
@@ -54,24 +42,45 @@ public class EditGoodsActivity extends BaseActivity {
     private void loadGoodsData() {
         showLoading();
         new Thread(() -> {
-            currentGoods = GoodsDao.getGoodsById(goodsId);
-            runOnUiThread(() -> {
-                hideLoading();
-                if (currentGoods == null) {
-                    ToastUtil.show(this, "加载失败");
-                    finish();
-                    return;
-                }
-                etTitle.setText(currentGoods.getTitle());
-                etContent.setText(currentGoods.getContent());
-                if (currentGoods.getPublishType() == 0) {
-                    rgType.check(R.id.rb_sell);
+            try {
+                Response<Result<Goods>> response = RetrofitClient.getInstance()
+                    .getApiService().getGoodsById(goodsId).execute();
+                runOnUiThread(() -> {
+                    hideLoading();
+                    if (!response.isSuccessful() || response.body() == null
+                            || !response.body().isSuccess()) {
+                        ToastUtil.show(EditGoodsActivity.this, "加载失败");
+                        finish();
+                        return;
+                    }
+                    currentGoods = response.body().getData();
+
+                    // 校验所有权
+                    int myId = UserSession.getCurrentUser() != null
+                        ? UserSession.getCurrentUser().getUserId() : 0;
+                    if (currentGoods.getUserId() != myId) {
+                        ToastUtil.show(EditGoodsActivity.this, "无权修改他人商品");
+                        finish();
+                        return;
+                    }
+                    // 已售出不可修改
+                    if (currentGoods.getStatus() != 1) {
+                        ToastUtil.show(EditGoodsActivity.this, "已售出商品不可修改");
+                        finish();
+                        return;
+                    }
+
+                    etTitle.setText(currentGoods.getTitle());
+                    etContent.setText(currentGoods.getContent());
                     etPrice.setText(String.valueOf(currentGoods.getPrice()));
-                } else {
-                    rgType.check(R.id.rb_exchange);
-                    etWant.setText(currentGoods.getWantGoods());
-                }
-            });
+                });
+            } catch (IOException e) {
+                runOnUiThread(() -> {
+                    hideLoading();
+                    ToastUtil.show(EditGoodsActivity.this, "网络连接失败");
+                    finish();
+                });
+            }
         }).start();
     }
 
@@ -79,38 +88,52 @@ public class EditGoodsActivity extends BaseActivity {
         String title = etTitle.getText().toString().trim();
         String content = etContent.getText().toString().trim();
         if (title.isEmpty() || content.isEmpty()) {
-            ToastUtil.show(this, "不能为空");
+            ToastUtil.show(this, "标题和描述不能为空");
             return;
         }
 
+        String priceStr = etPrice.getText().toString().trim();
         double price = 0;
-        if (type == 0 && !etPrice.getText().toString().trim().isEmpty()) {
-            price = Double.parseDouble(etPrice.getText().toString().trim());
+        if (!priceStr.isEmpty()) {
+            try {
+                price = Double.parseDouble(priceStr);
+            } catch (NumberFormatException e) {
+                ToastUtil.show(this, "价格格式不正确");
+                return;
+            }
         }
-        String want = type == 1 ? etWant.getText().toString().trim() : null;
 
-        Goods goods = new Goods();
-        goods.setGoodsId(goodsId);
-        goods.setUserId(currentGoods.getUserId());
-        goods.setTitle(title);
-        goods.setContent(content);
-        goods.setPrice(price);
-        goods.setPublishType(type);
-        goods.setWantGoods(want);
+        GoodsRequest goodsReq = new GoodsRequest();
+        goodsReq.setTitle(title);
+        goodsReq.setContent(content);
+        goodsReq.setPrice(price);
+        goodsReq.setPublishType(0);
+        goodsReq.setCategory(currentGoods.getCategory());
 
         showLoading();
         new Thread(() -> {
-            boolean res = GoodsDao.updateGoods(goods);
-            runOnUiThread(() -> {
-                hideLoading();
-                if (res) {
-                    ToastUtil.show(this, "修改成功");
-                    setResult(RESULT_OK);
-                    finish();
-                } else {
-                    ToastUtil.show(this, "修改失败");
-                }
-            });
+            try {
+                Response<Result<String>> response = RetrofitClient.getInstance()
+                    .getApiService().updateGoods(goodsId, goodsReq).execute();
+                runOnUiThread(() -> {
+                    hideLoading();
+                    if (response.isSuccessful() && response.body() != null
+                            && response.body().isSuccess()) {
+                        ToastUtil.show(EditGoodsActivity.this, "修改成功");
+                        setResult(RESULT_OK);
+                        finish();
+                    } else {
+                        String err = response.body() != null
+                            ? response.body().getMessage() : "修改失败";
+                        ToastUtil.show(EditGoodsActivity.this, err);
+                    }
+                });
+            } catch (IOException e) {
+                runOnUiThread(() -> {
+                    hideLoading();
+                    ToastUtil.show(EditGoodsActivity.this, "网络连接失败");
+                });
+            }
         }).start();
     }
 }

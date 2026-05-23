@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout android:fitsSystemWindows="true" xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,18 +8,18 @@
     <!-- 用户信息卡片 -->
     <androidx.cardview.widget.CardView
         android:id="@+id/card_user"
-        android:layout_width="match_parent"
+    android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         app:cardCornerRadius="16dp"
         app:cardElevation="6dp"
-        android:background="@drawable/bg_gradient_blue"
+        app:cardBackgroundColor="@color/white"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+    android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="24dp">
 
@@ -28,10 +27,10 @@
                 android:id="@+id/iv_avatar"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:src="@mipmap/ic_launcher"
+                android:src="@drawable/bg_image_placeholder"
                 android:scaleType="centerCrop"
-                android:background="@drawable/bg_gradient_blue"
-                android:padding="2dp"
+                android:background="@drawable/bg_avatar_circle"
+                android:padding="3dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>
@@ -43,7 +42,7 @@
                 android:text="用户昵称"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:textColor="@color/white"
+                android:textColor="@color/black"
                 app:layout_constraintStart_toEndOf="@id/iv_avatar"
                 app:layout_constraintTop_toTopOf="@id/iv_avatar"
                 android:layout_marginStart="24dp"/>
@@ -54,7 +53,7 @@
                 android:layout_height="wrap_content"
                 android:text="学号：2024001"
                 android:textSize="15sp"
-                android:textColor="#E3F2FD"
+                android:textColor="@color/black"
                 app:layout_constraintStart_toEndOf="@id/iv_avatar"
                 app:layout_constraintTop_toBottomOf="@id/tv_username"
                 android:layout_marginStart="24dp"
@@ -63,10 +62,10 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- 功能列表：我的发布 -->
+    <!-- 功能列表：编辑资料（新增） -->
     <LinearLayout
-        android:id="@+id/ll_my_publish"
-        android:layout_width="match_parent"
+        android:id="@+id/ll_edit_profile"
+    android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
         android:padding="18dp"
@@ -75,6 +74,88 @@
         android:orientation="horizontal"
         android:elevation="2dp"
         app:layout_constraintTop_toBottomOf="@id/card_user"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:src="@android:drawable/ic_menu_edit"
+            android:tint="@color/primary_blue"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="编辑资料"
+            android:textSize="17sp"
+            android:textColor="@color/text_primary"
+            android:layout_marginStart="18dp"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@android:drawable/ic_media_next"
+            android:tint="@color/text_secondary"
+            android:layout_gravity="center_vertical"/>
+
+    </LinearLayout>
+
+    <!-- 功能列表：我的交易 -->
+    <LinearLayout
+        android:id="@+id/ll_my_transaction"
+    android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:padding="18dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:elevation="2dp"
+        app:layout_constraintTop_toBottomOf="@id/ll_edit_profile"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:src="@android:drawable/ic_menu_recent_history"
+            android:tint="@color/primary_blue"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="我的交易"
+            android:textSize="17sp"
+            android:textColor="@color/text_primary"
+            android:layout_marginStart="18dp"/>
+
+        <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@android:drawable/ic_media_next"
+            android:tint="@color/text_secondary"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+
+    <!-- 功能列表：我的发布 -->
+    <LinearLayout
+        android:id="@+id/ll_my_publish"
+    android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:padding="18dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:elevation="2dp"
+        app:layout_constraintTop_toBottomOf="@id/ll_my_transaction"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -109,7 +190,7 @@
     <!-- 功能列表：我的收藏 -->
     <LinearLayout
         android:id="@+id/ll_my_collect"
-        android:layout_width="match_parent"
+    android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
         android:padding="18dp"
@@ -152,7 +233,7 @@
     <!-- 退出登录按钮 -->
     <Button
         android:id="@+id/btn_logout"
-        android:layout_width="match_parent"
+    android:layout_width="match_parent"
         android:layout_height="52dp"
         android:text="退出登录"
         android:textSize="17sp"

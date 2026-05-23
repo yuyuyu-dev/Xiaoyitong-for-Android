@@ -9,12 +9,15 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.schooltrade.R;
+import com.example.schooltrade.api.Result;
+import com.example.schooltrade.api.RetrofitClient;
 import com.example.schooltrade.base.BaseFragment;
 import com.example.schooltrade.entity.Conversation;
-import com.example.schooltrade.model.db.MessageDao;
 import com.example.schooltrade.utils.ToastUtil;
 import com.example.schooltrade.utils.UserSession;
+import java.io.IOException;
 import java.util.List;
+import retrofit2.Response;
 
 public class MessageFragment extends BaseFragment {
     private RecyclerView recyclerMessage;
@@ -53,12 +56,20 @@ public class MessageFragment extends BaseFragment {
         new Thread(() -> {
             try {
                 int userId = UserSession.getCurrentUser().getUserId();
-                conversationList = MessageDao.getConversations(userId);
-                
+                Response<Result<List<Conversation>>> response = RetrofitClient.getInstance()
+                    .getApiService().getConversations(userId).execute();
+
                 if (getActivity() == null) return;
                 getActivity().runOnUiThread(() -> {
                     hideLoading();
-                    
+
+                    if (response.isSuccessful() && response.body() != null
+                            && response.body().isSuccess()) {
+                        conversationList = response.body().getData();
+                    } else {
+                        conversationList = null;
+                    }
+
                     if (conversationList == null || conversationList.isEmpty()) {
                         tvEmpty.setVisibility(View.VISIBLE);
                         tvEmpty.setText("暂无消息\n快去和买家卖家聊聊吧~");
@@ -66,10 +77,10 @@ public class MessageFragment extends BaseFragment {
                     } else {
                         tvEmpty.setVisibility(View.GONE);
                         recyclerMessage.setVisibility(View.VISIBLE);
-                        
+
                         adapter = new ConversationAdapter(mContext, conversationList);
                         recyclerMessage.setAdapter(adapter);
-                        
+
                         adapter.setOnItemClickListener(position -> {
                             Conversation conv = conversationList.get(position);
                             Intent intent = new Intent(mContext, ChatActivity.class);
@@ -77,6 +88,7 @@ public class MessageFragment extends BaseFragment {
                             intent.putExtra("otherUserName", conv.getOtherUserName());
                             intent.putExtra("goodsId", conv.getGoodsId());
                             intent.putExtra("goodsTitle", conv.getGoodsTitle());
+                            intent.putExtra("otherUserAvatar", conv.getOtherUserAvatar());
                             startActivity(intent);
                         });
                     }

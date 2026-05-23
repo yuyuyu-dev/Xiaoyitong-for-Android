@@ -47,4 +47,16 @@ dependencies {
 // RecyclerView 列表控件
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
+    // Retrofit + OkHttp + Gson (网络请求)
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    // Glide (图片加载)
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    // ViewPager2 (Banner轮播)
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
 }

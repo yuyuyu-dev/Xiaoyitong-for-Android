@@ -7,12 +7,18 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.schooltrade.R;
+import com.example.schooltrade.api.MessageRequest;
+import com.example.schooltrade.api.Result;
+import com.example.schooltrade.api.RetrofitClient;
 import com.example.schooltrade.base.BaseActivity;
 import com.example.schooltrade.entity.Message;
-import com.example.schooltrade.model.db.MessageDao;
 import com.example.schooltrade.utils.ToastUtil;
 import com.example.schooltrade.utils.UserSession;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import retrofit2.Response;
 
 public class ChatActivity extends BaseActivity {
     private RecyclerView recyclerChat;
@@ -26,6 +32,9 @@ public class ChatActivity extends BaseActivity {
     private int goodsId;
     private String goodsTitle;
     private int currentUserId;
+    private String autoMessage;
+    private String otherUserAvatar;
+    private String myAvatarUrl;
 
     @Override
     protected int getLayoutId() {
@@ -57,7 +66,11 @@ public class ChatActivity extends BaseActivity {
             otherUserName = getIntent().getStringExtra("otherUserName");
             goodsId = getIntent().getIntExtra("goodsId", 0);
             goodsTitle = getIntent().getStringExtra("goodsTitle");
-            
+            autoMessage = getIntent().getStringExtra("autoMessage");
+            otherUserAvatar = getIntent().getStringExtra("otherUserAvatar");
+            myAvatarUrl = UserSession.getCurrentUser() != null
+                ? UserSession.getCurrentUser().getAvatarUrl() : null;
+
             if (UserSession.getCurrentUser() == null) {
                 ToastUtil.show(this, "请先登录");
                 finish();
@@ -83,32 +96,65 @@ public class ChatActivity extends BaseActivity {
         showLoading();
         new Thread(() -> {
             try {
-                messageList = MessageDao.getConversationMessages(currentUserId, otherUserId, goodsId);
-                if (messageList == null) {
+                Response<Result<List<Message>>> response = RetrofitClient.getInstance()
+                    .getApiService()
+                    .getConversationMessages(currentUserId, otherUserId, goodsId)
+                    .execute();
+                if (response.isSuccessful() && response.body() != null
+                        && response.body().isSuccess() && response.body().getData() != null) {
+                    messageList = response.body().getData();
+                } else {
                     messageList = new java.util.ArrayList<>();
                 }
-                MessageDao.markAsRead(currentUserId, otherUserId, goodsId);
+                // 标记已读
+                Map<String, Integer> readBody = new HashMap<>();
+                readBody.put("userId", currentUserId);
+                readBody.put("otherUserId", otherUserId);
+                readBody.put("goodsId", goodsId);
+                RetrofitClient.getInstance().getApiService().markAsRead(readBody).execute();
 
                 runOnUiThread(() -> {
                     try {
                         hideLoading();
-                        adapter = new ChatMessageAdapter(this, messageList, currentUserId);
+                        adapter = new ChatMessageAdapter(ChatActivity.this, messageList,
+                            currentUserId, myAvatarUrl, otherUserAvatar);
                         recyclerChat.setAdapter(adapter);
 
                         if (!messageList.isEmpty()) {
                             recyclerChat.scrollToPosition(messageList.size() - 1);
                         }
+
+                        // 自动发送消息（从购买按钮跳转时）
+                        if (autoMessage != null && !autoMessage.isEmpty()) {
+                            sendAutoMessage();
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
-                        ToastUtil.show(this, "显示消息失败");
+                        ToastUtil.show(ChatActivity.this, "显示消息失败");
                     }
                 });
-            } catch (Exception e) {
+            } catch (IOException e) {
                 e.printStackTrace();
                 runOnUiThread(() -> {
                     hideLoading();
-                    ToastUtil.show(this, "加载消息失败：" + e.getMessage());
+                    ToastUtil.show(ChatActivity.this, "加载消息失败");
                 });
+            }
+        }).start();
+    }
+
+    private void sendAutoMessage() {
+        String msg = autoMessage;
+        autoMessage = null; // 只发一次
+        new Thread(() -> {
+            try {
+                RetrofitClient.getInstance().getApiService()
+                    .sendMessage(new MessageRequest(otherUserId, goodsId, msg))
+                    .execute();
+                runOnUiThread(() -> loadMessages());
+            } catch (IOException e) {
+                runOnUiThread(() ->
+                    ToastUtil.show(ChatActivity.this, "自动消息发送失败"));
             }
         }).start();
     }
@@ -120,23 +166,26 @@ public class ChatActivity extends BaseActivity {
             return;
         }
 
-        Message message = new Message();
-        message.setSenderId(currentUserId);
-        message.setReceiverId(otherUserId);
-        message.setGoodsId(goodsId);
-        message.setContent(content);
-        message.setMessageType("text");
-
         new Thread(() -> {
-            boolean success = MessageDao.sendMessage(message);
-            runOnUiThread(() -> {
-                if (success) {
-                    etInput.setText("");
-                    loadMessages();
-                } else {
-                    ToastUtil.show(this, "发送失败");
-                }
-            });
+            try {
+                Response<Result<Message>> response = RetrofitClient.getInstance()
+                    .getApiService()
+                    .sendMessage(new MessageRequest(otherUserId, goodsId, content))
+                    .execute();
+                runOnUiThread(() -> {
+                    if (response.isSuccessful() && response.body() != null
+                            && response.body().isSuccess()) {
+                        etInput.setText("");
+                        loadMessages();
+                    } else {
+                        ToastUtil.show(ChatActivity.this, "发送失败");
+                    }
+                });
+            } catch (IOException e) {
+                runOnUiThread(() -> {
+                    ToastUtil.show(ChatActivity.this, "网络连接失败");
+                });
+            }
         }).start();
     }
 

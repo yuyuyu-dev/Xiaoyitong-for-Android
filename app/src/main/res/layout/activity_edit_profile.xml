@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:fitsSystemWindows="true" xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_gray">
+
+    <!-- 顶部栏 -->
+    <LinearLayout
+    android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/primary_blue"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:elevation="4dp">
+
+        <ImageView
+            android:id="@+id/btn_back"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_revert"
+            android:tint="@color/white" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="编辑资料"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:layout_marginEnd="24dp" />
+    </LinearLayout>
+
+    <ScrollView
+    android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+    android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- 头像区域 -->
+            <LinearLayout
+    android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <ImageView
+                    android:id="@+id/iv_avatar"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/bg_image_placeholder"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/bg_avatar_circle"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="点击更换头像"
+                    android:textSize="13sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+
+            <!-- 表单区域 -->
+            <androidx.cardview.widget.CardView
+    android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="3dp"
+                android:layout_marginTop="8dp">
+
+                <LinearLayout
+    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <!-- 学号（不可编辑） -->
+                    <LinearLayout
+    android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="14dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:text="学号"
+                            android:textSize="15sp"
+                            android:textColor="@color/text_primary" />
+
+                        <EditText
+                            android:id="@+id/et_account"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textSize="15sp"
+                            android:textColor="@color/text_secondary"
+                            android:enabled="false"
+                            android:background="@null" />
+                    </LinearLayout>
+
+    android:layout_width="match_parent" android:layout_height="0.5dp"
+                        android:background="@color/divider_gray" />
+
+                    <!-- 昵称 -->
+                    <LinearLayout
+    android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="14dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:text="昵称"
+                            android:textSize="15sp"
+                            android:textColor="@color/text_primary" />
+
+                        <EditText
+                            android:id="@+id/et_realname"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="请输入昵称"
+                            android:textSize="15sp"
+                            android:background="@null" />
+                    </LinearLayout>
+
+    android:layout_width="match_parent" android:layout_height="0.5dp"
+                        android:background="@color/divider_gray" />
+
+                    <!-- 电话 -->
+                    <LinearLayout
+    android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="14dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:text="电话（选填）"
+                            android:textSize="15sp"
+                            android:textColor="@color/text_primary" />
+
+                        <EditText
+                            android:id="@+id/et_phone"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="请输入电话号码"
+                            android:textSize="15sp"
+                            android:inputType="phone"
+                            android:background="@null" />
+                    </LinearLayout>
+
+    android:layout_width="match_parent" android:layout_height="0.5dp"
+                        android:background="@color/divider_gray" />
+
+                    <!-- 宿舍 -->
+                    <LinearLayout
+    android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="14dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:text="宿舍（选填）"
+                            android:textSize="15sp"
+                            android:textColor="@color/text_primary" />
+
+                        <EditText
+                            android:id="@+id/et_dormitory"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="请输入宿舍号"
+                            android:textSize="15sp"
+                            android:background="@null" />
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 保存按钮 -->
+            <Button
+                android:id="@+id/btn_save"
+    android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="保存修改"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:background="@drawable/bg_button_primary"
+                android:layout_marginTop="24dp"
+                android:elevation="4dp"
+                android:stateListAnimator="@null" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

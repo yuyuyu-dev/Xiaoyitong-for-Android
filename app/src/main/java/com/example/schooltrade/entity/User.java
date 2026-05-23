@@ -7,6 +7,7 @@ public class User {
     private String realName;
     private String phone;
     private String dormitory;
+    private String avatarUrl;
     private int isRealAuth;
     // 无参构造
     public User() {}
@@ -26,6 +27,8 @@ public class User {
     public void setDormitory(String dormitory) { this.dormitory = dormitory; }
     public int getIsRealAuth() { return isRealAuth; }
     public void setIsRealAuth(int isRealAuth) { this.isRealAuth = isRealAuth; }
+    public String getAvatarUrl() { return avatarUrl; }
+    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
 
     public void setPassword(String pwd) {
         this.pwd = pwd;

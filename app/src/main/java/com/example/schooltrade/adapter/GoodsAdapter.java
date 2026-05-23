@@ -1,17 +1,16 @@
 package com.example.schooltrade.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.example.schooltrade.R;
+import com.example.schooltrade.api.RetrofitClient;
 import com.example.schooltrade.entity.Goods;
 import java.util.List;
 
@@ -62,6 +61,10 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
         return new Holder(view);
     }
 
+    private static final String[] CATEGORY_NAMES = {
+        "", "教材书籍", "数码产品", "生活用品", "服饰鞋包", "运动器材", "其他"
+    };
+
     @Override
     public void onBindViewHolder(@NonNull Holder holder, int position) {
         Goods g = list.get(position);
@@ -77,6 +80,23 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
             holder.price.setText("置换");
         }
 
+        // 分类标签
+        if (g.getCategory() > 0 && g.getCategory() < CATEGORY_NAMES.length) {
+            holder.tvCategory.setText(CATEGORY_NAMES[g.getCategory()]);
+            holder.tvCategory.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvCategory.setVisibility(View.GONE);
+        }
+
+        // 已卖出印章 (status != 1 即为已售出/已下架)
+        boolean isSold = (g.getStatus() != 1);
+        if (holder.soldOverlay != null) {
+            holder.soldOverlay.setVisibility(isSold ? View.VISIBLE : View.GONE);
+        }
+        if (holder.tvSoldStamp != null) {
+            holder.tvSoldStamp.setVisibility(isSold ? View.VISIBLE : View.GONE);
+        }
+
         // 加载商品图片
         loadImage(holder.img, g.getImgUrl());
 
@@ -85,42 +105,34 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
             if (itemClickListener != null) itemClickListener.onItemClick(position);
         });
 
-        // 管理模式：显示编辑和删除按钮
-        if (isMyPublishMode) {
-            holder.btnEdit.setVisibility(View.VISIBLE);
-            holder.btnDelete.setVisibility(View.VISIBLE);
-
+        // 管理模式：显示编辑和删除按钮（已售出则隐藏）
+        if (isMyPublishMode && g.getStatus() == 1) {
+            holder.divider.setVisibility(View.VISIBLE);
+            holder.llButtons.setVisibility(View.VISIBLE);
             holder.btnEdit.setOnClickListener(v -> {
                 if (listener != null) listener.onEdit(position);
             });
-
             holder.btnDelete.setOnClickListener(v -> {
                 if (listener != null) listener.onDelete(position);
             });
         } else {
-            holder.btnEdit.setVisibility(View.GONE);
-            holder.btnDelete.setVisibility(View.GONE);
+            holder.divider.setVisibility(View.GONE);
+            holder.llButtons.setVisibility(View.GONE);
         }
     }
 
     /**
-     * 加载图片（从文件路径）
+     * 加载图片（网络URL，使用Glide）
      */
     private void loadImage(ImageView imageView, String imagePath) {
         if (imagePath != null && !imagePath.isEmpty()) {
-            try {
-                Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-                if (bitmap != null) {
-                    imageView.setImageBitmap(bitmap);
-                } else {
-                    imageView.setImageResource(R.mipmap.ic_launcher);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                imageView.setImageResource(R.mipmap.ic_launcher);
-            }
+            Glide.with(context)
+                .load(RetrofitClient.fullUrl(imagePath))
+                .placeholder(R.drawable.bg_image_placeholder)
+                .error(R.drawable.bg_image_placeholder)
+                .into(imageView);
         } else {
-            imageView.setImageResource(R.mipmap.ic_launcher);
+            imageView.setImageResource(R.drawable.bg_image_placeholder);
         }
     }
 
@@ -129,8 +141,12 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
 
     public static class Holder extends RecyclerView.ViewHolder {
         ImageView img;
-        TextView title, content, type, price;
-        Button btnEdit, btnDelete;
+        TextView title, content, type, price, tvCategory;
+        View soldOverlay;
+        TextView tvSoldStamp;
+        TextView btnEdit, btnDelete;
+        View divider;
+        android.view.ViewGroup llButtons;
 
         public Holder(@NonNull View itemView) {
             super(itemView);
@@ -139,8 +155,13 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
             content = itemView.findViewById(R.id.tv_content);
             type = itemView.findViewById(R.id.tv_type);
             price = itemView.findViewById(R.id.tv_price);
+            tvCategory = itemView.findViewById(R.id.tv_category);
+            soldOverlay = itemView.findViewById(R.id.sold_overlay);
+            tvSoldStamp = itemView.findViewById(R.id.tv_sold_stamp);
             btnEdit = itemView.findViewById(R.id.btn_edit);
             btnDelete = itemView.findViewById(R.id.btn_delete);
+            divider = itemView.findViewById(R.id.divider);
+            llButtons = itemView.findViewById(R.id.ll_buttons);
         }
     }
 }

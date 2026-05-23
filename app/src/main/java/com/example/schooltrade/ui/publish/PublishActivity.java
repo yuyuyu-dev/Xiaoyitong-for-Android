@@ -37,12 +37,10 @@ public class PublishActivity extends BaseActivity {
         "教材书籍", "数码产品", "生活用品", "服饰鞋包", "运动器材", "其他"
     };
 
-    private EditText etTitle, etContent, etPrice, etWant;
-    private RadioGroup rgType;
+    private EditText etTitle, etContent, etPrice;
     private LinearLayout llCategoryRow1, llCategoryRow2;
     private ImageView ivProductImage;
     private View flImageContainer;
-    private int type = 0;
     private int category = 0;
     private String selectedImagePath = null;
     private static final int REQUEST_IMAGE_PICK = 1001;
@@ -61,8 +59,6 @@ public class PublishActivity extends BaseActivity {
             etTitle = findViewById(R.id.et_title);
             etContent = findViewById(R.id.et_content);
             etPrice = findViewById(R.id.et_price);
-            etWant = findViewById(R.id.et_want);
-            rgType = findViewById(R.id.rg_type);
             llCategoryRow1 = findViewById(R.id.ll_category_row1);
             llCategoryRow2 = findViewById(R.id.ll_category_row2);
             ivProductImage = findViewById(R.id.iv_product_image);
@@ -70,8 +66,7 @@ public class PublishActivity extends BaseActivity {
             Button btnPublish = findViewById(R.id.btn_publish);
 
             // 检查必要控件
-            if (etTitle == null || etContent == null || etPrice == null ||
-                etWant == null || rgType == null || btnPublish == null) {
+            if (etTitle == null || etContent == null || etPrice == null || btnPublish == null) {
                 ToastUtil.show(this, "页面初始化失败");
                 finish();
                 return;
@@ -80,21 +75,8 @@ public class PublishActivity extends BaseActivity {
             // 分类 Chip 按钮 — 分两行，每行 3 个，默认选中"其他"
             if (llCategoryRow1 != null && llCategoryRow2 != null) {
                 initCategoryChips();
-                updateCategoryChipSelection(6); // 默认选中"其他"
+                updateCategoryChipSelection(6);
             }
-
-            // 类型切换
-            rgType.setOnCheckedChangeListener((group, id) -> {
-                if (id == R.id.rb_sell) {
-                    type = 0;
-                    etPrice.setVisibility(View.VISIBLE);
-                    etWant.setVisibility(View.GONE);
-                } else {
-                    type = 1;
-                    etWant.setVisibility(View.VISIBLE);
-                    etPrice.setVisibility(View.GONE);
-                }
-            });
 
             // 图片点击
             if (flImageContainer != null) {
@@ -244,33 +226,26 @@ public class PublishActivity extends BaseActivity {
             category = 6;
         }
 
-        double price;
-        if (type == 0) {
-            String priceStr = etPrice.getText().toString().trim();
-            if (!priceStr.isEmpty()) {
-                try {
-                    price = Double.parseDouble(priceStr);
-                } catch (NumberFormatException e) {
-                    ToastUtil.show(this, "价格格式不正确");
-                    return;
-                }
-            } else {
-                price = 0;
+        String priceStr = etPrice.getText().toString().trim();
+        double price = 0;
+        if (!priceStr.isEmpty()) {
+            try {
+                price = Double.parseDouble(priceStr);
+            } catch (NumberFormatException e) {
+                ToastUtil.show(this, "价格格式不正确");
+                return;
             }
-        } else {
-            price = 0;
         }
-        String want = type == 1 ? etWant.getText().toString().trim() : null;
 
         // 有图片时先上传拿到 URL，再发布
         if (selectedImagePath != null && !selectedImagePath.isEmpty()) {
-            uploadImageThenPublish(title, content, price, want);
+            uploadImageThenPublish(title, content, price);
         } else {
-            doPublish(title, content, price, want, "");
+            doPublish(title, content, price, "");
         }
     }
 
-    private void uploadImageThenPublish(String title, String content, double price, String want) {
+    private void uploadImageThenPublish(String title, String content, double price) {
         showLoading();
         new Thread(() -> {
             try {
@@ -286,11 +261,11 @@ public class PublishActivity extends BaseActivity {
 
                 if (uploadResp.isSuccessful() && uploadResp.body() != null && uploadResp.body().isSuccess()) {
                     String imgUrl = uploadResp.body().getData();
-                    doPublish(title, content, price, want, imgUrl != null ? imgUrl : "");
+                    doPublish(title, content, price, imgUrl != null ? imgUrl : "");
                 } else {
                     // 上传失败，仍然发布（不带图）
                     runOnUiThread(() -> ToastUtil.show(PublishActivity.this, "图片上传失败，将发布纯文字商品"));
-                    doPublish(title, content, price, want, "");
+                    doPublish(title, content, price, "");
                 }
             } catch (Exception e) {
                 runOnUiThread(() -> ToastUtil.show(PublishActivity.this, "图片上传失败"));
@@ -299,13 +274,12 @@ public class PublishActivity extends BaseActivity {
         }).start();
     }
 
-    private void doPublish(String title, String content, double price, String want, String imgUrl) {
+    private void doPublish(String title, String content, double price, String imgUrl) {
         GoodsRequest goodsReq = new GoodsRequest();
         goodsReq.setTitle(title);
         goodsReq.setContent(content);
         goodsReq.setPrice(price);
-        goodsReq.setPublishType(type);
-        goodsReq.setWantGoods(want);
+        goodsReq.setPublishType(0);
         goodsReq.setImgUrl(imgUrl);
         goodsReq.setCategory(category);
 

@@ -76,14 +76,24 @@ public class MyPublishActivity extends BaseActivity {
                     adapter.setOnGoodsClickListener(new GoodsAdapter.OnGoodsClickListener() {
                         @Override
                         public void onEdit(int position) {
+                            Goods g = myGoodsList.get(position);
+                            if (g.getStatus() != 1) {
+                                ToastUtil.show(MyPublishActivity.this, "已售出商品不可修改");
+                                return;
+                            }
                             Intent intent = new Intent(MyPublishActivity.this, EditGoodsActivity.class);
-                            intent.putExtra("goodsId", myGoodsList.get(position).getGoodsId());
+                            intent.putExtra("goodsId", g.getGoodsId());
                             editLauncher.launch(intent);
                         }
 
                         @Override
                         public void onDelete(int position) {
-                            String title = myGoodsList.get(position).getTitle();
+                            Goods g = myGoodsList.get(position);
+                            if (g.getStatus() != 1) {
+                                ToastUtil.show(MyPublishActivity.this, "已售出商品不可删除");
+                                return;
+                            }
+                            String title = g.getTitle();
                             new AlertDialog.Builder(MyPublishActivity.this)
                                     .setTitle("确认删除")
                                     .setMessage("确定要删除「" + title + "」吗？\n删除后无法恢复。")

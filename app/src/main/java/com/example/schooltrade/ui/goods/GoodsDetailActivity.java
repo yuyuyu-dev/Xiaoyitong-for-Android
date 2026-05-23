@@ -237,6 +237,12 @@ public class GoodsDetailActivity extends AppCompatActivity {
 
                         loadImage(goods.getImgUrl());
 
+                        // 自己的商品：隐藏收藏和购买按钮
+                        if (goods.getUserId() == userId) {
+                            if (btnCollect != null) btnCollect.setVisibility(android.view.View.GONE);
+                            if (btnBuy != null) btnBuy.setVisibility(android.view.View.GONE);
+                        }
+
                         // 已售出处理
                         if (goods.getStatus() == 0) {
                             // 不是卖家本人 → 提示已售出并返回刷新列表
@@ -310,6 +316,10 @@ public class GoodsDetailActivity extends AppCompatActivity {
 
     // 收藏/取消收藏
     private void collectGoods() {
+        if (goods != null && goods.getUserId() == userId) {
+            ToastUtil.show(this, "不能收藏自己的商品");
+            return;
+        }
         new Thread(() -> {
             try {
                 if (btnCollect.getText().toString().equals("收藏商品")) {

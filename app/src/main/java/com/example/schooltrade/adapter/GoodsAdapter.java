@@ -105,8 +105,8 @@ public class GoodsAdapter extends RecyclerView.Adapter<GoodsAdapter.Holder> {
             if (itemClickListener != null) itemClickListener.onItemClick(position);
         });
 
-        // 管理模式：显示编辑和删除按钮
-        if (isMyPublishMode) {
+        // 管理模式：显示编辑和删除按钮（已售出则隐藏）
+        if (isMyPublishMode && g.getStatus() == 1) {
             holder.divider.setVisibility(View.VISIBLE);
             holder.llButtons.setVisibility(View.VISIBLE);
             holder.btnEdit.setOnClickListener(v -> {
